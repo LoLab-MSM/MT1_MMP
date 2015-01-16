@@ -1,7 +1,17 @@
 from pysb.integrate import odesolve
 import numpy as np
 import pylab as pl
-from mt1mmp import model
+from MT1-MMP import mt1mmp
+
+monomer_abc_model()
+    
+rate_constant_abc_model()
+
+rule_original_abc_model()
+
+initial_condition_abc_model()
+
+observe_abc_model()
 
 t=np.linspace(0,5,400)
 
