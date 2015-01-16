@@ -1,6 +1,5 @@
 #simplest model from MT1-MMP model (abc model)
 from pysb import *
-
 Model()
 
 def monomer_bc_model():

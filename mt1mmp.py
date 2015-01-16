@@ -1,7 +1,5 @@
 from pysb import *
 
-Model()
-
 def monomer_abc_model():
     """Let a, b, and c be MMP2, TIMP2, and MT1-MMP, respectivelly.
     Monomer a has only one binding site. Each of monomer b and c has two sites"""
@@ -25,20 +23,27 @@ def rule_original_abc_model():
     Rule('bc', b(b2=None) + c(c1=None) <> b(b2=1)%c(c1=1), kbc, lbc)
     Rule('cc', c(c2=None) + c(c2=None) <> c(c2=1)%c(c2=1), kcc, lcc)
 
+def rule_abremoved_abc_model():
+    #model knockout 1
+    #remove ab's supplies
+    #remove forward reaction of ab + {c, cc, bcc, abcc}
+    
+    Rule('bc', b(b1=None, b2=None) + c(c1=None) <> b(b1=None, b2=1)%c(c1=1), kbc, lbc)
+    Rule('cc', c(c2=None) + c(c2=None) <> c(c2=1)%c(c2=1), kcc, lcc)
+    Rule('ab', a(a1=None) + b(b1=None) >> a(a1=1)%b(b1=1), kab)
+    Rule('abc', a(a1=1)%b(b1=1, b2=2)%c(c1=2) >> a(a1=1)%b(b1=1, b2=None) + c(c1=None), lbc)
+    Rule('abcc', a(a1=1)%b(b1=1, b2=2)%c(c1=2, c2=3)%c(c2=3) >> a(a1=1)%b(b1=1, b2=None) + c(c1=None, c2=3)%c(c2=3), lbc)
+    Rule('abccb', a(a1=1)%b(b1=1, b2=2)%c(c1=2, c2=3)%c(c2=3, c1=4)%b(b2=4) >> a(a1=1)%b(b1=1, b2=None) + c(c1=None,c2=3)%c(c2=3, c1=4)%b(b2=4), lbc)
+    Rule('abccba', a(a1=1)%b(b1=1, b2=2)%c(c1=2, c2=3)%c(c2=3, c1=4)%b(b2=4, b1=5)%a(a1=5) >> a(a1=1)%b(b1=1, b2=None) + c(c1=None, c2=3)%c(c2=3, c1=4)%b(b2=4, b1=5)%a(a1=5), lbc)
 
-##model knockout 1
-##remove ab's supplies
-##remove forward reaction of ab + {c, cc, bcc, abcc}
-##keep rule bc and cc
-#Rule('ab', a(a1=None) + b(b1=None, b2=None) >> a(a1=1)%b(b1=1), kab)
-#Rule('abc', a(a1=1)%b(b1=1, b2=None) + c(c1=None) <> a(a1=1)%b(b1=1, b2=2)%c(c1=2), kbc, lbc)
-
-
-##model knockout 2
-##remove abc's supplies
-##remove forward reaction of abc + {c, bc, abc} and 
-##keep rule bc and cc
-
+#def rule_abcremoved1_abc_model():
+#    #model knockout 2
+#    #remove abc's supplies
+#    #remove forward reaction of abc + {c, bc, abc} and backward reaction of ab + c <> abc
+#    Rule('ab', a(a1=None) + b(b1=None) >> a(a1=1)%b(b1=1), kab)
+#    Rule('bc', b(b2=None) + c(c1=None) <> b(b2=1)%c(c1=1), kbc, lbc)
+#    Rule('cc', c(c1=None,c2=None) + c(c2=None, c1=None) <> c(c1=None,c2=1)%c(c2=1,c1=None), kcc, lcc)
+#    Rule('abc', a(a1=None) + b%c )
 
 def initial_condition_abc_model():
     #from the data
@@ -54,9 +59,22 @@ def observe_abc_model():
     Observable('tab', a(a1=1)%b(b1=1, b2=None))
     Observable('tbc', b(b1=None, b2=1)%c(c1=1, c2=None))
     Observable('tcc', c(c1=None, c2=1)%c(c1=None, c2=1))
-    Observable('abc', a(a1=1)%b(b1=1, b2=2)%c(c1=2, c2=None))
-    Observable('bcc', b(b1=None, b2=1)%c(c1=1, c2=2)%c(c1=None, c2=2))
-    Observable('abcc', a(a1=1)%b(b1=1,b2=2)%c(c1=2,c2=3)%c(c1=None,c2=3))
-    Observable('bccb', b(b1=None, b2=1)%c(c1=1, c2=2)%c(c2=2, c1=3)%b(b2=3, b1=None))
-    Observable('abccb', a(a1=1)%b(b1=1, b2=2)%c(c1=2, c2=3)%c(c2=3, c1=4)%b(b2=4, b1=None))
-    Observable('abccba', a(a1=1)%b(b1=1, b2=2)%c(c1=2, c2=3)%c(c2=3, c1=4)%b(b2=4, b1=5)%a(a1=5))
+    Observable('tabc', a(a1=1)%b(b1=1, b2=2)%c(c1=2, c2=None))
+    Observable('tbcc', b(b1=None, b2=1)%c(c1=1, c2=2)%c(c1=None, c2=2))
+    Observable('tabcc', a(a1=1)%b(b1=1,b2=2)%c(c1=2,c2=3)%c(c1=None,c2=3))
+    Observable('tbccb', b(b1=None, b2=1)%c(c1=1, c2=2)%c(c2=2, c1=3)%b(b2=3, b1=None))
+    Observable('tabccb', a(a1=1)%b(b1=1, b2=2)%c(c1=2, c2=3)%c(c2=3, c1=4)%b(b2=4, b1=None))
+    Observable('tabccba', a(a1=1)%b(b1=1, b2=2)%c(c1=2, c2=3)%c(c2=3, c1=4)%b(b2=4, b1=5)%a(a1=5))
+
+def return_model(model_type):
+    Model()
+    monomer_abc_model()
+    rate_constant_abc_model()
+    initial_condition_abc_model()
+    if model_type=='original':
+        rule_original_abc_model()
+    if model_type=='abremoved':
+        rule_abremoved_abc_model()
+    observe_abc_model()
+    return model
+        
