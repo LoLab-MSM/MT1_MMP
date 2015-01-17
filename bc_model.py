@@ -1,4 +1,6 @@
 #simplest model from MT1-MMP model (abc model)
+#we ignore molecule a
+
 from pysb import *
 Model()
 

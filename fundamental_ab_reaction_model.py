@@ -1,6 +1,7 @@
+"""This is reaction between molecule a and b to produce ab"""
+#a + b <-> ab
+
 from pysb import *
-
-
 Model()
 
 Monomer('a',['b'])

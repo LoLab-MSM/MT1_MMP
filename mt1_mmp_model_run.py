@@ -1,11 +1,11 @@
 from pysb.integrate import odesolve
 import numpy as np
 import pylab as pl
-from MT1_MMP import mt1mmp
-from MT1_MMP import mt1mmp as mt1mmp2
+from MT1_MMP import mt1_mmp_model
+#from MT1_MMP import mt1_mmp_model as mt1mmp2
 
-model=mt1mmp.return_model('original')
-model2=mt1mmp2.return_model('abremoved')
+model=mt1_mmp_model.return_model('original')
+model2=mt1_mmp_model.return_model('abremoved')
 
 
 t=np.linspace(0,30000,10000)

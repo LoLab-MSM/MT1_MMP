@@ -37,9 +37,9 @@ def rule_abremoved_abc_model():
     #remove ab's supplies
     #remove forward reaction of ab + {c, cc, bcc, abcc}
     
+    Rule('ab', a(a1=None) + b(b1=None) >> a(a1=1)%b(b1=1), kab)
     Rule('bc', b(b1=None, b2=None) + c(c1=None) <> b(b1=None, b2=1)%c(c1=1), kbc, lbc)
     Rule('cc', c(c2=None) + c(c2=None) <> c(c2=1)%c(c2=1), kcc, lcc)
-    Rule('ab', a(a1=None) + b(b1=None) >> a(a1=1)%b(b1=1), kab)
     Rule('abc', a(a1=1)%b(b1=1, b2=2)%c(c1=2) >> a(a1=1)%b(b1=1, b2=None) + c(c1=None), lbc)
     Rule('abcc', a(a1=1)%b(b1=1, b2=2)%c(c1=2, c2=3)%c(c2=3) >> a(a1=1)%b(b1=1, b2=None) + c(c1=None, c2=3)%c(c2=3), lbc)
     Rule('abccb', a(a1=1)%b(b1=1, b2=2)%c(c1=2, c2=3)%c(c2=3, c1=4)%b(b2=4) >> a(a1=1)%b(b1=1, b2=None) + c(c1=None,c2=3)%c(c2=3, c1=4)%b(b2=4), lbc)

@@ -1,7 +1,7 @@
 from pysb.integrate import odesolve
 import numpy as np
 import pylab as pl
-from c8bid import model
+from c8_bid_model import model
 
 t=np.linspace(0,20000)
 

@@ -1,7 +1,7 @@
 from pysb.integrate import odesolve
 import numpy as np
 import pylab as pl
-from abmodel import model
+from fundamental_ab_reaction_model import model
 
 
 t=np.linspace(0,40)
