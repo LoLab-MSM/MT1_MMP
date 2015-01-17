@@ -14,6 +14,7 @@ zouty = odesolve(model,t2, integrator='vode', with_jacobian=True, rtol=1e-20, at
 #print model.odes
 #print zout
 
+#to simulate abcc(infinity) vs b(0)
 initb = np.logspace(-9,-5, 100)
 N=[]
 N2=[]
@@ -83,7 +84,6 @@ pl.show()
 
 #pl.ion()
 pl.figure()
-pl.xlim(0,.4)
 pl.title('Type 3 (Remain at some values)')
 pl.plot(t2, zouty['ta'], label="a")
 pl.plot(t2, zouty['tcc'], label="cc")

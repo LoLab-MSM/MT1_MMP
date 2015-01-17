@@ -1,3 +1,12 @@
+"""The model plays important role in the initial stage of cancer cell invasion.
+Molecule MT1-MMP exists on the surface of cancer cell. This molecule works with
+MMP2 and TIMP2 to degrade extracellular matrix (ECM) and then open the way for 
+cancer cell to leave the primary state to metastasize to distant part of the body.
+MT1-MMP model talks about binding reactions between the three components,
+MT1-MMP, MMP, and TIMP2. There is one component including in the system, say abcc,
+that is believe to be a component that will make the ECM degradation happened.
+SO, in the simulation, we always want to know the value of abcc at the equilibrium state"""
+
 from pysb import *
 
 def monomer_abc_model():
