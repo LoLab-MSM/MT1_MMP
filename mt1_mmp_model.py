@@ -31,7 +31,7 @@ def rule_original_abc_model():
     Rule('ab', a(a1=None) + b(b1=None) >> a(a1=1)%b(b1=1), kab)
     Rule('bc', b(b2=None) + c(c1=None) <> b(b2=1)%c(c1=1), kbc, lbc)
     Rule('cc', c(c2=None) + c(c2=None) <> c(c2=1)%c(c2=1), kcc, lcc)
-
+    
 def rule_abremoved_abc_model():
     #model knockout 1
     #remove ab's supplies
@@ -45,14 +45,35 @@ def rule_abremoved_abc_model():
     Rule('abccb', a(a1=1)%b(b1=1, b2=2)%c(c1=2, c2=3)%c(c2=3, c1=4)%b(b2=4) >> a(a1=1)%b(b1=1, b2=None) + c(c1=None,c2=3)%c(c2=3, c1=4)%b(b2=4), lbc)
     Rule('abccba', a(a1=1)%b(b1=1, b2=2)%c(c1=2, c2=3)%c(c2=3, c1=4)%b(b2=4, b1=5)%a(a1=5) >> a(a1=1)%b(b1=1, b2=None) + c(c1=None, c2=3)%c(c2=3, c1=4)%b(b2=4, b1=5)%a(a1=5), lbc)
 
-#def rule_abcremoved1_abc_model():
-#    #model knockout 2
-#    #remove abc's supplies
-#    #remove forward reaction of abc + {c, bc, abc} and backward reaction of ab + c <> abc
-#    Rule('ab', a(a1=None) + b(b1=None) >> a(a1=1)%b(b1=1), kab)
-#    Rule('bc', b(b2=None) + c(c1=None) <> b(b2=1)%c(c1=1), kbc, lbc)
-#    Rule('cc', c(c1=None,c2=None) + c(c2=None, c1=None) <> c(c1=None,c2=1)%c(c2=1,c1=None), kcc, lcc)
-#    Rule('abc', a(a1=None) + b%c )
+def rule_abcremoved1_abc_model():
+    #model knockout 2
+    #remove abc's supplies
+    #remove forward reaction of abc + {c, bc, abc} and backward reaction of ab + c <> abc
+    Rule('ab', a(a1=None) + b(b1=None) >> a(a1=1)%b(b1=1), kab)
+    Rule('bc', b(b2=None) + c(c1=None) <> b(b2=1)%c(c1=1), kbc, lbc)
+    Rule('cc', c(c1=None, c2=None) + c(c2=None, c1=None) <> c(c1=None,c2=1)%c(c2=1,c1=None), kcc, lcc)
+    Rule('bcc', b(b1=None, b2=1)%c(c1=1, c2=None) + c(c1=None, c2=None) <> b(b1=None, b2=1)%c(c1=1, c2=2)%c(c1=None, c2=2), kcc, lcc)
+    Rule('bccb', b(b1=None, b2=1)%c(c1=1, c2=None) + c(c1=1, c2=None)%b(b1=None, b2=1) <> b(b1=None, b2=1)%c(c1=1, c2=2)%c(c1=3, c2=2)%b(b1=None, b2=3), kcc, lcc)
+    Rule('abcc', a(a1=1)%b(b1=1, b2=2)%c(c1=2, c2=3)%c(c2=3, c1=None) >> a(a1=1)%b(b1=1, b2=2)%c(c1=2, c2=None) + c(c2=None, c1=None), lcc)
+    Rule('abccb', a(a1=1)%b(b1=1, b2=2)%c(c1=2, c2=3)%c(c2=3, c1=4)%b(b2=4, b1=None) >> a(a1=1)%b(b1=1, b2=2)%c(c1=2, c2=None) + c(c2=None, c1=4)%b(b2=4, b1=None), lcc)
+    Rule('abccba', a(a1=1)%b(b1=1, b2=2)%c(c1=2, c2=3)%c(c2=3, c1=4)%b(b2=4, b1=5)%a(a1=5) >> a(a1=1)%b(b1=1, b2=2)%c(c1=2, c2=None) + c(c2=None, c1=4)%b(b2=4, b1=5)%a(a1=5), lcc)
+
+def rule_abcremoved2_abc_model():
+    #model knockout 2
+    #remove abc's supplies
+    #remove forward reaction of abc + {c, bc, abc} and backward reaction of ab + c <> abc
+    Rule('ab', a(a1=None) + b(b1=None) >> a(a1=1)%b(b1=1), kab)
+    Rule('bc', b(b1=None, b2=None) + c(c1=None) <> b(b1=None, b2=1)%c(c1=1), kbc, lbc)
+    Rule('cc', c(c1=None, c2=None) + c(c2=None, c1=None) <> c(c1=None,c2=1)%c(c2=1,c1=None), kcc, lcc)
+    Rule('abc_ab', a(a1=1)%b(b1=1, b2=None) + c(c1=None) >> a(a1=1)%b(b1=1, b2=2)%c(c1=2), kbc) # ab + c -> abc
+    Rule('abcc_ab', a(a1=1)%b(b1=1, b2=None) + c(c1=None, c2=2)%c(c2=2, c1=None) <> a(a1=1)%b(b1=1, b2=3)%c(c1=3, c2=2)%c(c2=2, c1=None), kbc, lbc) # ab + cc <> abcc
+    Rule('abccb_ab', a(a1=1)%b(b1=1, b2=None) + c(c1=None, c2=2)%c(c2=2, c1=3)%b(b1=None, b2=3) <> a(a1=1)%b(b1=1, b2=3)%c(c1=3, c2=2)%c(c2=2, c1=4)%b(b1=None, b2=4), kbc, lbc) # ab +ccb <> abccb
+    Rule('abccba_ab', a(a1=1)%b(b1=1, b2=None) + c(c1=None, c2=2)%c(c2=2, c1=3)%b(b1=4, b2=3)%a(a1=4) <> a(a1=1)%b(b1=1, b2=3)%c(c1=3, c2=2)%c(c2=2, c1=4)%b(b1=5, b2=4)%a(a1=5), kbc, lbc) # ab + ccba <> abccba
+    Rule('bcc', b(b1=None, b2=1)%c(c1=1, c2=None) + c(c1=None, c2=None) <> b(b1=None, b2=1)%c(c1=1, c2=2)%c(c1=None, c2=2), kcc, lcc)
+    Rule('bccb', b(b1=None, b2=1)%c(c1=1, c2=None) + c(c1=1, c2=None)%b(b1=None, b2=1) <> b(b1=None, b2=1)%c(c1=1, c2=2)%c(c1=3, c2=2)%b(b1=None, b2=3), kcc, lcc)
+    Rule('abcc', a(a1=1)%b(b1=1, b2=2)%c(c1=2, c2=3)%c(c2=3, c1=None) >> a(a1=1)%b(b1=1, b2=2)%c(c1=2, c2=None) + c(c2=None, c1=None), lcc)
+    Rule('abccb', a(a1=1)%b(b1=1, b2=2)%c(c1=2, c2=3)%c(c2=3, c1=4)%b(b2=4, b1=None) >> a(a1=1)%b(b1=1, b2=2)%c(c1=2, c2=None) + c(c2=None, c1=4)%b(b2=4, b1=None), lcc)
+    Rule('abccba', a(a1=1)%b(b1=1, b2=2)%c(c1=2, c2=3)%c(c2=3, c1=4)%b(b2=4, b1=5)%a(a1=5) >> a(a1=1)%b(b1=1, b2=2)%c(c1=2, c2=None) + c(c2=None, c1=4)%b(b2=4, b1=5)%a(a1=5), lcc)
 
 def initial_condition_abc_model():
     #from the data
@@ -84,6 +105,10 @@ def return_model(model_type):
         rule_original_abc_model()
     if model_type=='abremoved':
         rule_abremoved_abc_model()
+    if model_type=='abc1removed':
+        rule_abcremoved1_abc_model()
+    if model_type=='abc2removed':
+        rule_abcremoved2_abc_model()
     observe_abc_model()
     return model
         
