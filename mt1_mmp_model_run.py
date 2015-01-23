@@ -6,7 +6,7 @@ from MT1_MMP import mt1_mmp_model
 
 model=mt1_mmp_model.return_model('original')
 model2=mt1_mmp_model.return_model('abremoved')
-
+#hdfghgfhbfggfn
 
 t=np.linspace(0,30000,10000)
 t2=np.linspace(0,5,500)
