@@ -1,0 +1,55 @@
+# The model plays important role in the initial stage of cancer cell invasion.
+# Molecule MT1-MMP exists on the surface of cancer cell. This molecule works with
+# MMP2 and TIMP2 to degrade extracellular matrix (ECM) and then open the way for 
+# cancer cell to leave the primary state to metastasize to distant part of the body.
+# MT1-MMP model talks about binding reactions between the three components,
+# MT1-MMP, MMP, and TIMP2. There is one component including in the system, say abcc,
+# that is believe to be a component that will make the ECM degradation happened.
+# SO, in the simulation, we always want to know the value of abcc at the equilibrium state
+begin parameters
+  kab   2.100000e+07
+  kbc   2.740000e+06
+  lbc   2.000000e-04
+  kcc   4.000000e+06
+  lcc   1.000000e-02
+  ao    1.000000e-06
+  bo    1.000000e-06
+  co    1.000000e-06
+end parameters
+
+begin molecule types
+  A(b)
+  B(a,c)
+  C(b,c)
+end molecule types
+
+begin species
+  A(b)      ao
+  B(a,c)   bo
+  C(b,c)   co
+end species
+
+begin observables
+	#Molecules AB A(b!1).B(a!1)
+	Molecules ABC A(b!1).B(a!1,c!2).C(b!2,c)
+end	observables
+
+
+begin functions
+	#NO_AB(x) = if (AB(x),kbc, kbc)
+	NO_ABC(x,y) = if (ABC(x)>0 || ABC(y)>0,0, kcc)
+end functions	
+
+begin reaction rules
+  A(b) + B(a) -> A(b!1).B(a!1)    kab
+  B(c) + C(b) <-> B(c!1).C(b!1)   kbc, lbc 
+  #C(c) + C(c) <-> C(c!1).C(c!1)    kcc, lcc
+  #%c:B(c) + C(b) <-> B(c!1).C(b!1)    NO_AB(c), lbc 
+  %x:C(c) + %y:C(c) <-> C(c!1).C(c!1)    NO_ABC(x,y), lcc
+end reaction rules
+
+
+
+generate_network({TextReaction=>1});
+simulate({method=>"ode",t_end=>100,n_steps=>1000,rtol=>10e-12,atol=>10e-12})
+
