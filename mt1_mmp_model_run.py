@@ -1,7 +1,7 @@
 from pysb.integrate import odesolve
 import numpy as np
 import pylab as pl
-from MT1_MMP import mt1_mmp_model
+import mt1_mmp_model
 #from MT1_MMP import mt1_mmp_model as mt1mmp2
 
 model=mt1_mmp_model.return_model('original')
@@ -11,7 +11,7 @@ model4=mt1_mmp_model.return_model('abc2removed')
 
 t=np.linspace(0,30000,10000)
 t2=np.linspace(0,5,500)
-zouty = odesolve(model,t2, integrator='vode', with_jacobian=True, rtol=1e-20, atol=1e-20)
+zouty = odesolve(model,t2, integrator='vode', with_jacobian=True, rtol=1e-20, atol=1e-20, verbose=True)
 #print model.odes
 #print zout
 

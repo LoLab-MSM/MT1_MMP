@@ -111,4 +111,9 @@ def return_model(model_type):
         rule_abcremoved2_abc_model()
     observe_abc_model()
     return model
-        
+Model()
+monomer_abc_model()
+rate_constant_abc_model()
+initial_condition_abc_model()
+rule_original_abc_model()
+  
