@@ -1,6 +1,6 @@
 #import pylab as pl
-from MT1_MMP import bc_model
-from MT1_MMP.bc_model import model
+import bc_model
+from bc_model import model
 
 import numpy as np
 from pysb.integrate import odesolve
@@ -23,4 +23,3 @@ t=np.linspace(0,5,100)
 zout = odesolve(model, t)
 #zout = odesolve(model,t, integrator='vode', with_jacobian=True, rtol=1e-20, atol=1e-20)
 print model.odes
-
