@@ -1,4 +1,4 @@
-from pysb.integrate import odesolve
+from pysb.integrate import odesolve, rdesolve
 import numpy as np
 import pylab as pl
 from fundamental_ab_reaction_model import model
@@ -7,7 +7,13 @@ from fundamental_ab_reaction_model import model
 t=np.linspace(0,40)
 
 zout = odesolve(model,t)
+
 print model.odes
+print model.species
+
+##Solve PDE using fipy
+pout = rdesolve(model)
+
 #print zout
 #pl.ion()
 #pl.figure()
