@@ -14,9 +14,6 @@ Monomer('c',['b'])
 #Diffusion('a(b=None), Da') #(species, value or parameter)
 #Diffusion('a(c=None), Dc')
 
-""""Solve RDE using fipy"""
-#diffusion constants as a list
-#D=[1,1,0]
 Parameter('k',1)
 Parameter('l',1e-10)
 
@@ -29,5 +26,4 @@ Initial(c(b=None),co)
 
 Observable('dt', a(b=1)%c(b=1))
 Observable('at', a(b=None))
-Observable('ct', c(b=None))
-
+Observable('ct', c(b=None)) 
