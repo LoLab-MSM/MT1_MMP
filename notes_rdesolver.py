@@ -1,5 +1,5 @@
 #Solver for RDE using fipy (def or class?)
-def rdesolve(model, mesh, initc):
+def rdesolve(model, mesh, initc, bound):
      """solve the system not using matrix system"""
      import fipy
 
@@ -31,20 +31,19 @@ def rdesolve(model, mesh, initc):
      __s2.constrain(0, m.facesRight)
      
      si = fipy.Viewer((__s0, __s1, __s2))
-          
+     si.plot()
+     print __s0  
      """equations"""
-     eqn0 = fipy.TransientTerm(var=__s0) == fipy.DiffusionTerm(1, var=__s0) #- __s0*__s1 +__s2 #+ model.odes[0]
-     eqn1 = fipy.TransientTerm(var=__s1) == fipy.DiffusionTerm(1, var=__s1) #- __s0*__s1 +__s2 #+ model.odes[1]
-     eqn2 = fipy.TransientTerm(var=__s2) == fipy.DiffusionTerm(1, var=__s2) #+ __s0*__s1 -__s2 #+ model.odes[1]
+     eqn0 = fipy.TransientTerm(var=__s0) == fipy.DiffusionTerm(1, var=__s0) - 10*__s0*__s1 +__s2 #+ model.odes[0]
+     eqn1 = fipy.TransientTerm(var=__s1) == fipy.DiffusionTerm(1, var=__s1) - 10*__s0*__s1 +__s2 #+ model.odes[1]
+     eqn2 = fipy.TransientTerm(var=__s2) == fipy.DiffusionTerm(1, var=__s2) + 10*__s0*__s1 -__s2 #+ model.odes[1]
       
      eqn = eqn0 & eqn1 & eqn2
  
      """Solve the equation"""
-     for t in range(10): 
+     for t in range(20): 
          __s0.updateOld()
          __s1.updateOld()
          __s2.updateOld()
          eqn.solve(dt=1e-3)
          si.plot()
-if __name__ == '__main__':
-     raw_input("Explicit transient diffusion. Press <return> to proceed...")

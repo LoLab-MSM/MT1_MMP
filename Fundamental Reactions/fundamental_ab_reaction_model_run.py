@@ -1,6 +1,6 @@
 from pysb.integrate import odesolve#, rdesolve
-# from rdesolver import rdesolve
-from notes_rdesolver import rdesolve
+from rdesolver import rdesolve
+#from notes_rdesolver import rdesolve
 import numpy as np
 import pylab as pl
 from fundamental_ab_reaction_model import model
@@ -23,9 +23,9 @@ for i in range(len(model.odes)):
 
 """parameters"""
 mesh = ['1d', 100, 1.]
-initial = [0.5, 0.5, 0]
-#Dirichlet = []
-pout = rdesolve(model, mesh, initial) #, initial
+initial = [1, 0.5, 2]
+boundary = [1, 0]
+pout = rdesolve(model, mesh, initial, boundary) #, initial
 
 #print zout
 #pl.ion()
@@ -37,3 +37,6 @@ pout = rdesolve(model, mesh, initial) #, initial
 #pl.xlabel("Time (s)")
 #pl.ylabel("Molecules or Cells")
 #pl.show()
+
+if __name__ == '__main__':
+         raw_input("Press <return> to proceed...")

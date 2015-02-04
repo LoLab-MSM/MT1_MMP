@@ -32,25 +32,32 @@ m = Grid1D(nx=100, Lx=1.)
 #solution as vector
 #problem : how to put source term?
 v = CellVariable(mesh=m, hasOld=True, value=[[0.5], [0.5]], elementshape=(2,))
-v.constrain([[0], [1]], m.facesLeft)
-v.constrain([[1], [0]], m.facesRight)
+v.constrain([[0], [1]], where=m.facesLeft)
+v.constrain([[1], [0]], where=m.facesRight)
+print v.faceValue
 S0 = -v[0] * v[1]
 S1 = -v[0] * v[1]
-#source = [S0, S1]
+source = (S0, S1)
 #print source
 eqn = TransientTerm([[1,0],[0,1]]) == DiffusionTerm([[[0.01,-1],[1,0.01]]])
-eqn2 = TransientTerm([[1,0],[0,1]]) == DiffusionTerm([[[1,0],[0,1]]]) #+source
+eqn2 = TransientTerm([[1,0],[0,1]]) == DiffusionTerm([[[1,0],[0,1]]]) #+ [-v[0] * v[1], -v[0] * v[1]]
+vu = [v[0],v[1]]
+
 if __name__ == '__main__':
-    vi = Viewer(vars=(v[0],v[1]))
+#     vi = Viewer(vars=(v[0],v[1]))
+     vr=[]
+     for i in range(2):
+         vr.append(vu[i])   
+     vi = Viewer(vars=vr)
 for t in range(10): 
      v.updateOld()
      eqn.solve(var=v, dt=1.e-3)
      if __name__ == '__main__':
          vi.plot()
-for t in range(10): 
-     v.updateOld()
-     eqn2.solve(var=v, dt=1.e-3)
-     if __name__ == '__main__':
-         vi.plot()
+# for t in range(100): 
+#      v.updateOld()
+#      eqn2.solve(var=v, dt=1.e-3)
+#      if __name__ == '__main__':
+#          vi.plot()
 if __name__ == '__main__':
      raw_input("Explicit transient diffusion. Press <return> to proceed...")
