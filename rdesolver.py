@@ -91,7 +91,8 @@ def rdesolve(model, mesh, initc, bound): #Diffusifity, Dirichlet = None, Neumann
      """equations"""
      M=numpy.identity(len(model.species))
 #      equation = fipy.TransientTerm([[1,0,0],[0,1,0],[0,0,1]]) == fipy.DiffusionTerm([[[1,0,0],[0,1,0],[0,0,1]]])
-     equation = fipy.TransientTerm(M) == fipy.DiffusionTerm([M]) #+ Source Term??     
+     source = [100, 0.5]
+     equation = fipy.TransientTerm(M) == fipy.DiffusionTerm([M]) + (source)    
       
      """Solve the equation"""
      for t in range(100):

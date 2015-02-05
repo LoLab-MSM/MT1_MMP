@@ -1,12 +1,14 @@
 from fipy import *
 dx=1.
 mesh=Grid1D(dx=dx, nx=50)
-phi = CellVariable(name="solution", mesh=mesh, value=0.5)
+phi = CellVariable(name="solution", mesh=mesh)
+phi.value = 0.5
+print phi
 D=1.
 phi.constrain(0, where=mesh.facesRight)
 phi.constrain(1, where=mesh.facesLeft)
-print phi.faceValue
-equation = TransientTerm()==ExplicitDiffusionTerm(coeff=D)
+# print phi.faceValue
+equation = TransientTerm()==ExplicitDiffusionTerm(coeff=D) + phi * 0.5
 timestep = 0.9 * dx * dx**2 / (2*D)
 steps=100
 # phiAnalytical = CellVariable(name="analytical value", mesh=mesh)

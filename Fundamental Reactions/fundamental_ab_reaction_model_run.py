@@ -1,6 +1,6 @@
 from pysb.integrate import odesolve#, rdesolve
-from rdesolver import rdesolve
-#from notes_rdesolver import rdesolve
+#from rdesolver import rdesolve
+from notes_rdesolver import rdesolve
 import numpy as np
 import pylab as pl
 from fundamental_ab_reaction_model import model
