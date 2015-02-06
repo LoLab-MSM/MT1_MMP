@@ -86,19 +86,21 @@ def rdesolve(model, mesh, initc, bound): #Diffusifity, Dirichlet = None, Neumann
      for i in range(len(model.species)):
          vi.append(X[i])   
      view = fipy.Viewer(vars=vi)
-
-           
+               
      """equations"""
      M=numpy.identity(len(model.species))
-#      equation = fipy.TransientTerm([[1,0,0],[0,1,0],[0,0,1]]) == fipy.DiffusionTerm([[[1,0,0],[0,1,0],[0,0,1]]])
-     source = [100, 0.5]
-     equation = fipy.TransientTerm(M) == fipy.DiffusionTerm([M]) + (source)    
+#      M=[[1,0,0], [0,1,0], [0,0,1]]
+     N=numpy.reshape(M, (len(model.species), len(model.species), 1))
+     odes = [-X[0]*X[1] + X[2], -X[0]*X[1] + X[2], X[0]*X[1] - X[2]]
+     source = odes[0] * N[0] + odes[1] * N[1] + odes[2] * N[2]
+     
+     equation = fipy.TransientTerm(M) == fipy.DiffusionTerm([M]) #+ (source)    
       
      """Solve the equation"""
-     for t in range(100):
+     for t in range(10):
          X.updateOld()
          equation.solve(var=X, dt=1.e-3)
          view.plot()
  
-     
+     print X[2]
 #      

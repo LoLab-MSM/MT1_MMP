@@ -1,6 +1,6 @@
 from pysb.integrate import odesolve#, rdesolve
-#from rdesolver import rdesolve
-from notes_rdesolver import rdesolve
+from rdesolver import rdesolve
+#from rdesolver_test import rdesolve
 import numpy as np
 import pylab as pl
 from fundamental_ab_reaction_model import model
@@ -23,7 +23,7 @@ for i in range(len(model.odes)):
 
 """parameters"""
 mesh = ['1d', 100, 1.]
-initial = [1, 0.5, 2]
+initial = [0.5, 0.3, 0.1]
 boundary = [1, 0]
 pout = rdesolve(model, mesh, initial, boundary) #, initial
 

@@ -37,9 +37,7 @@ print v1
 v.constrain([[0], [1]], where=m.facesLeft)
 v.constrain([[1], [0]], where=m.facesRight)
 # print v.faceValue
-S0 = -v[0] * v[1]
-S1 = -v[0] * v[1]
-source = (S0, S1)
+
 #print source
 # eqn = TransientTerm([[1,0],[0,1]]) == DiffusionTerm([[[0.01,-1],[1,0.01]]])
 eqn2 = TransientTerm([[1,0],[0,1]]) == DiffusionTerm([[[1,0],[0,1]]])
@@ -47,7 +45,9 @@ M = [[0.01,-1],[1,0.01]]
 M2 = [[1,0],[0,1]]
 N = [[1,0],[0,1]]
 P = [100,0]
-Q = (v[0], v[1])  #+ [-v[0] * v[1], -v[0] * v[1]]
+S0 = -v[0] * v[1]
+S1 = -v[0] * v[1]
+source = (S0, S1)  #+ [-v[0] * v[1], -v[0] * v[1]]
 eqn3 = TransientTerm(N) == DiffusionTerm([M2]) +(Q)
 # print eqn3
 # quit()
