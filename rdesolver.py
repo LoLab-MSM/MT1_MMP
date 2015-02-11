@@ -24,6 +24,8 @@ def rdesolve(model, mesh, initc, bound): #Diffusifity, Dirichlet = None, Neumann
      """
      import fipy
      import numpy
+     import sympy
+     import re
      
      """TEST 1D 2 RDEs"""
 #      nx = ny = 100
@@ -88,12 +90,22 @@ def rdesolve(model, mesh, initc, bound): #Diffusifity, Dirichlet = None, Neumann
      view = fipy.Viewer(vars=vi)
                
      """equations"""
+     stringodes = ';'.join(['%s' % sympy.ccode(model.odes[i]) for i in range(len(model.odes))])
+
+     for j in range(len(model.odes)):
+         c_odes = re.sub(r'_+s%d' % j,'X[%d]' % j, stringodes)
+         stringodes = c_odes
+
+     odes_m= c_odes.split(';')
+     print odes_m
+     print type(odes_m)
+     
+     
      M=numpy.identity(len(model.species))
 #      M=[[1,0,0], [0,1,0], [0,0,1]]
      N=numpy.reshape(M, (len(model.species), len(model.species), 1))
-     odes = [-X[0]*X[1] + X[2], -X[0]*X[1] + X[2], X[0]*X[1] - X[2]]
-     source = odes[0] * N[0] + odes[1] * N[1] + odes[2] * N[2]
-     
+#      odes = [-X[0]*X[1] + X[2], -X[0]*X[1] + X[2], X[0]*X[1] - X[2]]
+#      source = odes_m[0] * N[0] + odes_m[1] * N[1] + odes_m[2] * N[2]
      equation = fipy.TransientTerm(M) == fipy.DiffusionTerm([M]) #+ (source)    
       
      """Solve the equation"""
@@ -101,6 +113,4 @@ def rdesolve(model, mesh, initc, bound): #Diffusifity, Dirichlet = None, Neumann
          X.updateOld()
          equation.solve(var=X, dt=1.e-3)
          view.plot()
- 
-     print X[2]
-#      
+      
