@@ -5,6 +5,90 @@ import numpy as np
 import pylab as pl
 from fundamental_ab_reaction_model import model
 
+##########
+from pysb.bng import generate_equations
+ 
+generate_equations(model, verbose=True)
+# 
+# for ic in model.initial_conditions:
+#     print ic
+# print
+# for sp in model.species:
+#     print sp
+# print
+# 
+# x = np.zeros(len(model.species))
+# print x
+# index = [model.get_species_index(ic[0]) for ic in model.initial_conditions]
+# x[index] = [ic[1].value for ic in model.initial_conditions]
+# print x
+
+# for rxn in model.reactions:
+#     print rxn['rate']
+#     for arg in rxn['rate'].args:
+#         print '\t', arg, type(arg)
+
+# print model.reactions[0]['rate']
+# for arg in model.reactions[0]['rate'].args:
+#     print arg
+  
+# print model.odes[0], type(model.odes[0])
+
+# import re
+# x = [10., 20., 30.]
+# p = [1., 2.]
+# p_names = ['k', 'l']
+# 
+# print model.odes[0]
+# ode = str(model.odes[0])
+# 
+# # species
+# for i in range(len(x)):
+#     ode = re.sub(r'__s%d' % i, 'x[%d]' % i, ode)
+# print ode
+# 
+# # rate constants
+# for i in range(len(p)):
+#     ode = re.sub(p_names[i], 'p[%d]' % i, ode)
+# print ode
+# 
+# ode = 'xdot = ' + ode
+# print ode
+# 
+# ode_py = compile(ode, '<test>', 'exec')
+# print ode_py
+# exec ode_py in locals()
+# print xdot
+
+# v[0] * v[1] * k[0]
+
+for p in model.parameters_rules():
+    print p.name, p.value
+print
+
+# k = []
+# for rxn in model.reactions:
+#     print rxn
+#     rule = model.rules[rxn['rule']]
+#     print rule
+#     if rxn['reverse']:
+#         val = rule.rate_reverse.value
+#     else:
+#         val = rule.rate_forward.value
+#     print val
+#     k.append(val)
+# print k
+
+
+# k = [model.rules[rxn['rule']].rate_reverse.value if rxn['reverse'] else model.rules[rxn['rule']].rate_forward.value
+#      for rxn in model.reactions]
+# 
+# print k
+
+# p = [k for k in model.reactions]
+
+quit()
+##############
 
 t=np.linspace(0,40)
 
