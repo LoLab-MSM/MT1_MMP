@@ -26,6 +26,9 @@ Rule('v2', v0(a=None) + v1(a=None) <> v0(a=1)%v1(a=1), k, l)
 ##############################
 #species, reactions, reactions_bidirectional, observables
 pysb.bng.generate_equations(model)
+##### DIFFUSIVITIES
+model.diffusivities = [0.1]*len(model.species)
+#####
 print
 print '##################################~PYSB~##################################'
 print
@@ -44,6 +47,9 @@ print
 print 'Initial Conditions'
 for init in model.initial_conditions:
     print init
+print
+for d in model.diffusivities:
+    print d
 print
 print '##################################~FIPY~##################################'
 print
@@ -141,6 +147,11 @@ print type(ODES)
 
 """Equations"""
 M = numpy.identity(len(model.species))
+#####
+for i,d in enumerate(model.diffusivities):
+    M[i,i] = d
+#####
+
 N = M
 N = numpy.reshape(M,(len(model.species),len(model.species),1))
 Q=int()
