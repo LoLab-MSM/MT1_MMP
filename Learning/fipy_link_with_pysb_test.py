@@ -209,7 +209,7 @@ import os
 if os.path.isfile(video_file_name):
     print "removing old video file. Check to see if this is correct"
     os.remove(video_file_name)
-os.system('avcon -r 2 -i img\%05d.png %s' % video_file_name)
+os.system('avconv -r 2 -i img%s.png %s' % ('%05d',video_file_name))
 
 
 if __name__ == '__main__':
