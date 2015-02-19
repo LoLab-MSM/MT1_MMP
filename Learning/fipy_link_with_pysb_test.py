@@ -3,19 +3,18 @@ import pysb.bng
 from fipy.meshes.factoryMeshes import Grid1D
 from scipy.integrate._ode import ode
 
-
 #PYSB
 Model()
 
 Monomer('v0', ['a'])
 Monomer('v1', ['a'])
 
-Parameter('k', 1.)
-Parameter('l', 1.)
+Parameter('k', 0.75)
+Parameter('l', 0.5)
 
-Parameter('v0_init', 0.5)
-Parameter('v1_init', 0.3)
-Parameter('v2_init', 0.1)
+Parameter('v0_init', 100)
+Parameter('v1_init', 200)
+Parameter('v2_init', 50)
 
 Initial(v0(a=None), v0_init)
 Initial(v1(a=None), v1_init)
@@ -27,7 +26,7 @@ Rule('v2', v0(a=None) + v1(a=None) <> v0(a=1)%v1(a=1), k, l)
 #species, reactions, reactions_bidirectional, observables
 pysb.bng.generate_equations(model)
 ##### DIFFUSIVITIES
-model.diffusivities = [0.1]*len(model.species)
+model.diffusivities = [1.5]*len(model.species)
 #####
 print
 print '##################################~PYSB~##################################'
@@ -61,7 +60,36 @@ import re
 
 """Create Mesh"""
 #??? in 2d, 3d, and Sphere Coordinate?
-m = Grid1D(nx=100, Lx=1.)
+m = fipy.Grid1D(nx=100, Lx=1.)
+mm = fipy.Grid2D(nx=100, ny=100, Lx=1., Ly=1.)
+
+m3 = fipy.Gmsh2DIn3DSpace('''
+     radius = 5.0;
+     cellSize = 0.3;
+     
+     // create inner 1/8 shell
+     Point(1) = {0, 0, 0, cellSize};
+     Point(2) = {-radius, 0, 0, cellSize};
+     Point(3) = {0, radius, 0, cellSize};
+     Point(4) = {0, 0, radius, cellSize};
+     Circle(1) = {2, 1, 3};
+     Circle(2) = {4, 1, 2};
+     Circle(3) = {4, 1, 3};
+     Line Loop(1) = {1, -3, 2} ;
+     Ruled Surface(1) = {1};
+     
+     // create remaining 7/8 inner shells
+     t1[] = Rotate {{0,0,1},{0,0,0},Pi/2} {Duplicata{Surface{1};}};
+     t2[] = Rotate {{0,0,1},{0,0,0},Pi} {Duplicata{Surface{1};}};
+     t3[] = Rotate {{0,0,1},{0,0,0},Pi*3/2} {Duplicata{Surface{1};}};
+     t4[] = Rotate {{0,1,0},{0,0,0},-Pi/2} {Duplicata{Surface{1};}};
+     t5[] = Rotate {{0,0,1},{0,0,0},Pi/2} {Duplicata{Surface{t4[0]};}};
+     t6[] = Rotate {{0,0,1},{0,0,0},Pi} {Duplicata{Surface{t4[0]};}};
+     t7[] = Rotate {{0,0,1},{0,0,0},Pi*3/2} {Duplicata{Surface{t4[0]};}};
+     
+     // create entire inner and outer shell
+     Surface Loop(100)={1,t1[0],t2[0],t3[0],t7[0],t4[0],t5[0],t6[0]};
+''', order=2).extrude(extrudeFunc=lambda r: 1.1 * r)
 
 """Call Initial Conditions"""
 # a=[]
@@ -88,12 +116,13 @@ ic = numpy.reshape(initt, (len(initt),1))
 # print
 
 """Define CellVariables"""
-v=fipy.CellVariable(mesh=m, hasOld=True, value=ic, elementshape=(len(model.species),))
-
+noise = fipy.GaussianNoiseVariable(mesh=m3,mean=0.5,variance=0.01).value
+v=fipy.CellVariable(mesh=m3, hasOld=True,elementshape=(len(model.species),)) # value=ic,
+v[:]=noise
 """Define Fixed-Boundary Conditions"""
 #?????
-v.constrain([[1], [1], [1]], where=m.facesLeft)
-v.constrain([[0], [0], [0]], where=m.facesRight)
+# v.constrain([[0], [0], [0]], where=m.facesLeft)
+# v.constrain([[0], [0], [0]], where=m.facesRight)
 
 """Define Source Matrix"""
 #ODES will be a list of odes(type: fipy's variable)
@@ -169,10 +198,15 @@ for j in range(len(model.species)):
     s.append(v[j])
 vi = fipy.Viewer(vars=s)
 #time????
-for t in range(10): 
+time=numpy.linspace(0,10,100)
+#########
+for t in range(1000): 
      v.updateOld()
-     eqn.solve(var=v, dt=1.e-3)
-     if __name__ == '__main__':
-         vi.plot()
+     eqn.solve(var=v, dt=0.01)
+     vi.plot()
+     #filename=str(t)+'.png'
+# import os
+# os.system('/home/james/Install/Chimera/bin/ffmpeg ')
+
 if __name__ == '__main__':
      raw_input("Press <return> to proceed...")
