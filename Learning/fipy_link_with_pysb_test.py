@@ -200,13 +200,17 @@ vi = fipy.Viewer(vars=s)
 #time????
 time=numpy.linspace(0,10,100)
 #########
-for t in range(1000): 
+for t in range(10):
      v.updateOld()
-     eqn.solve(var=v, dt=0.01)
-     vi.plot()
-     #filename=str(t)+'.png'
-# import os
-# os.system('/home/james/Install/Chimera/bin/ffmpeg ')
+     eqn.solve(var=v, dt=1.e-3)
+     vi.plot(filename = 'img%05d.png' % t)
+video_file_name = 'video.wmv'
+import os
+if os.path.isfile(video_file_name):
+    print "removing old video file. Check to see if this is correct"
+    os.remove(video_file_name)
+os.system('avcon -r 2 -i img\%05d.png %s' % video_file_name)
+
 
 if __name__ == '__main__':
      raw_input("Press <return> to proceed...")
