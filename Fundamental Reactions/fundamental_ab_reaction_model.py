@@ -24,6 +24,9 @@ Parameter('co',200)
 Initial(a(b=None),ao)
 Initial(c(b=None),co)
 
-Observable('dt', a(b=1)%c(b=1))
-Observable('at', a(b=None))
-Observable('ct', c(b=None)) 
+Observable('AC_complex', a(b=1)%c(b=1))
+Observable('A_free', a(b=None))
+Observable('C_free', c(b=None)) 
+Observable('A_tot', a())
+Observable('C_tot', c())
+

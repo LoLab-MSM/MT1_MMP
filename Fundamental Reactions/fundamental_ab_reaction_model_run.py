@@ -6,9 +6,10 @@ import pylab as pl
 from fundamental_ab_reaction_model import model
 
 ##########
-from pysb.bng import generate_equations
- 
-generate_equations(model, verbose=True)
+# from pysb.bng import generate_equations
+#  
+# generate_equations(model, verbose=True)
+
 # 
 # for ic in model.initial_conditions:
 #     print ic
@@ -62,9 +63,9 @@ generate_equations(model, verbose=True)
 
 # v[0] * v[1] * k[0]
 
-for p in model.parameters_rules():
-    print p.name, p.value
-print
+# for p in model.parameters_rules():
+#     print p.name, p.value
+# print
 
 # k = []
 # for rxn in model.reactions:
@@ -87,12 +88,22 @@ print
 
 # p = [k for k in model.reactions]
 
-quit()
+# quit()
 ##############
 
-t=np.linspace(0,40)
-
+t = np.linspace(0,0.1,101)
 zout = odesolve(model,t)
+
+#####
+print zout.dtype.names
+for i,name in enumerate(zout.dtype.names):
+    label = name if i >= len(model.species) else str(model.species[i])
+    pl.plot(t, zout[name], lw=3, label=label)
+pl.legend(loc=0)
+pl.ylim(ymax=220)
+pl.show()
+quit()
+#####
 
 for i in range(len(model.odes)):
      print model.species[i], ": __s", i, ":", model.odes[i]
