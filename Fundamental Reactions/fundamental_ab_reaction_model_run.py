@@ -94,6 +94,9 @@ from fundamental_ab_reaction_model import model
 t = np.linspace(0,0.1,101)
 zout = odesolve(model,t)
 
+print  type(zout.dtype.names[1])
+quit()
+
 #####
 print zout.dtype.names
 for i,name in enumerate(zout.dtype.names):

@@ -2,6 +2,7 @@
 #a + c <-> ac
 
 from pysb import * #calling all pysb classes
+import pysb.bng
 Model() # calling Model class. We don't have to put arguments inside since it all has default in it (in core file)
 
 Monomer('a',['b']) #calling monomer class in core file
@@ -30,3 +31,19 @@ Observable('C_free', c(b=None))
 Observable('A_tot', a())
 Observable('C_tot', c())
 
+pysb.bng.generate_equations(model)
+
+####
+#To know the list of species that included in the obs
+print model.observables[3].species
+####
+
+for i,ode in enumerate(model.odes):
+    print i,':', ode
+    print
+print '%%%%%%%'
+print type(model.odes[0])
+w = model.odes[0]+model.odes[1]
+
+#r = model.odes[0] - __s2*l #???
+print w

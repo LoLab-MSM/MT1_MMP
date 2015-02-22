@@ -6,27 +6,31 @@ from scipy.integrate._ode import ode
 #PYSB
 Model()
 
-Monomer('v0', ['a'])
-Monomer('v1', ['a'])
+Monomer('A', ['b'])
+Monomer('B', ['a','b'])
 
-Parameter('k', 0.75)
-Parameter('l', 0.5)
+Parameter('kab', 1)
+Parameter('lab', 1)
+Parameter('kbb', 1)
+Parameter('lbb', 1)
 
-Parameter('v0_init', 100)
-Parameter('v1_init', 200)
-Parameter('v2_init', 50)
+Parameter('A_init', 100)
+Parameter('B_init', 200)
+Parameter('C_init', 50)
 
-Initial(v0(a=None), v0_init)
-Initial(v1(a=None), v1_init)
-Initial(v0(a=1)%v1(a=1), v2_init)
+Initial(A(b=None), A_init)
+Initial(B(a=None,b=None), B_init)
+#Initial(A(b=1) % B(a=1), C_init)
 
-Rule('v2', v0(a=None) + v1(a=None) <> v0(a=1)%v1(a=1), k, l)
+Rule('AB_bind', A(b=None) + B(a=None) <> A(b=1) % B(a=1), kab, lab)
+Rule('BB_bind', B(b=None) + B(b=None) <> B(b=1) % B(b=1), kbb, lbb)
 
 ##############################
 #species, reactions, reactions_bidirectional, observables
 pysb.bng.generate_equations(model)
 ##### DIFFUSIVITIES
-model.diffusivities = [1.5]*len(model.species)
+model.diffusivities = [1.]*len(model.species)
+#model.diffusivities = [1., 1., 1.]
 #####
 print
 print '##################################~PYSB~##################################'
@@ -47,8 +51,9 @@ print 'Initial Conditions'
 for init in model.initial_conditions:
     print init
 print
-for d in model.diffusivities:
-    print d
+print 'Diffusion Constants'
+for i,d in enumerate(model.diffusivities):
+    print "species", i, "has difussion constant", ":", d
 print
 print '##################################~FIPY~##################################'
 print
@@ -59,13 +64,11 @@ import numpy
 import re
 
 """Create Mesh"""
-#??? in 2d, 3d, and Sphere Coordinate?
 m = fipy.Grid1D(nx=100, Lx=1.)
 mm = fipy.Grid2D(nx=100, ny=100, Lx=1., Ly=1.)
-
 m3 = fipy.Gmsh2DIn3DSpace('''
      radius = 5.0;
-     cellSize = 0.3;
+     cellSize = 0.1;
      
      // create inner 1/8 shell
      Point(1) = {0, 0, 0, cellSize};
@@ -116,39 +119,50 @@ ic = numpy.reshape(initt, (len(initt),1))
 # print
 
 """Define CellVariables"""
-noise = fipy.GaussianNoiseVariable(mesh=m3,mean=0.5,variance=0.01).value
 v=fipy.CellVariable(mesh=m3, hasOld=True,elementshape=(len(model.species),)) # value=ic,
+##put random initial condition
+noise = fipy.GaussianNoiseVariable(mesh=m3,mean=0.5,variance=0.01).value
+####
 v[:]=noise
+# v=fipy.CellVariable(mesh=m, hasOld=True,value=ic, elementshape=(len(model.species),))
 """Define Fixed-Boundary Conditions"""
-#?????
+#not necessary fo 3D on sphere
 # v.constrain([[0], [0], [0]], where=m.facesLeft)
 # v.constrain([[0], [0], [0]], where=m.facesRight)
 
 """Define Source Matrix"""
 #ODES will be a list of odes(type: fipy's variable)
 ODES = []
+##call the name and values or all rate constants and store them into list rc_name and rc
+rc_name = [model.rules[rxn['rule']].rate_reverse.name if rxn['reverse'] else model.rules[rxn['rule']].rate_forward.name for rxn in model.reactions]
+r = [model.rules[rxn['rule']].rate_reverse.value if rxn['reverse'] else model.rules[rxn['rule']].rate_forward.value for rxn in model.reactions]
+print rc_name
+print r
+print
+    
 for ode in model.odes:
     ode=str(ode)
+    print ode
     ##modify SPECIES
-    for i in range(len(model.odes)):
-        ode = re.sub('__s%d' % i, 'v[%d]' % i, ode)
+    ode = re.sub(r'_*s(\d+)', lambda m: 'v[%s]' % (int(m.group(1))), ode)
+#    for i in range(len(model.odes)):
+#        ode = re.sub('__s%d' % i, 'v[%d]' % i, ode)
     ##modify RATE CONSTANT
-    ##call the name and values and store them to lists
-    rc_name = [model.rules[rxn['rule']].rate_reverse.name if rxn['reverse'] else model.rules[rxn['rule']].rate_forward.name for rxn in model.reactions]
-    r = [model.rules[rxn['rule']].rate_reverse.value if rxn['reverse'] else model.rules[rxn['rule']].rate_forward.value for rxn in model.reactions]
-    ##modifying
     for i in range(len(rc_name)):
         ode = re.sub(rc_name[i],'r[%i]' % i,ode)
     ##create ydot=eqn
+    print ode
+    print
     ode = 'vdot = ' + ode 
     ##calculate the eqn
     ode_cal = compile(ode, '<$$$>', 'exec')
     exec ode_cal in locals()
     ODES.append(vdot)
-print ODES
-print type(ODES)
+#print ODES
+#print type(ODES)
 
 """%%%How to call rate constant name and value and input them to lists%%%"""
+##as a note only. not to run
 # w=model.odes[0]
 # w=str(w)
 # print w
@@ -175,22 +189,20 @@ print type(ODES)
 """%%%How to call rate constant name and value and input them to lists%%%"""
 
 """Equations"""
-M = numpy.identity(len(model.species))
+M = numpy.zeros((len(model.species),len(model.species)))
+U = numpy.identity(len(model.species))
 #####
 for i,d in enumerate(model.diffusivities):
     M[i,i] = d
 #####
 
-N = M
 N = numpy.reshape(M,(len(model.species),len(model.species),1))
 Q=int()
 for i in range(len(ODES)):
     Q += ODES[i] * N[i]
-print Q
-print type(Q)
-eqn = fipy.TransientTerm(M) == fipy.DiffusionTerm([M]) + (Q)
 
-print eqn
+eqn = fipy.TransientTerm(U) == fipy.DiffusionTerm([M]) + (Q)
+
 
 """Perform Integration"""
 s=[]
@@ -198,18 +210,25 @@ for j in range(len(model.species)):
     s.append(v[j])
 vi = fipy.Viewer(vars=s)
 #time????
-time=numpy.linspace(0,10,100)
+tmax=10.
+time=numpy.linspace(0,tmax,100)
 #########
-for t in range(10):
+for t in range(len(time)):
      v.updateOld()
-     eqn.solve(var=v, dt=1.e-3)
-     vi.plot(filename = 'img%05d.png' % t)
-video_file_name = 'video.wmv'
-import os
-if os.path.isfile(video_file_name):
-    print "removing old video file. Check to see if this is correct"
-    os.remove(video_file_name)
-os.system('avconv -r 2 -i img%s.png %s' % ('%05d',video_file_name))
+     eqn.solve(var=v, dt=time[1])
+     vi.plot()
+# for t in range(len(time)):
+#      print t
+#      print time[1]
+#      v.updateOld()
+#      eqn.solve(var=v, dt=time[1])
+#      vi.plot(filename = 'img%05d.png' % t)
+# video_file_name = 'video.wmv'
+# import os
+# if os.path.isfile(video_file_name):
+#     print "removing old video file. Check to see if this is correct"
+#     os.remove(video_file_name)
+# os.system('avconv -r 2 -i img%s.png %s' % ('%05d',video_file_name))
 
 
 if __name__ == '__main__':
