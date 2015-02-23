@@ -92,7 +92,7 @@ ic = numpy.reshape(initt, (len(initt),1))
 # print
 
 """Define CellVariables"""
-noise = fipy.GaussianNoiseVariable(mesh=m3,mean=1e-6,variance=1e-8).value
+noise = fipy.GaussianNoiseVariable(mesh=m3,mean=1e-6,variance=1e-7).value
 v=fipy.CellVariable(mesh=m3, hasOld=True,elementshape=(len(model.species),)) # value=ic,
 v[:]=noise
 # v=fipy.CellVariable(mesh=m, hasOld=True,value=ic, elementshape=(len(model.species),))
@@ -180,9 +180,9 @@ vi = fipy.Viewer(vars=s)
 tmax=10.
 time=numpy.linspace(0,tmax,100)
 #########
-for t in range(100):
+for t in range(10):
      v.updateOld()
-     eqn.solve(var=v, dt=1)
+     eqn.solve(var=v, dt=0.01)
      vi.plot()
 # for t in range(len(time)):
 #      print t

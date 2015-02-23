@@ -31,8 +31,8 @@ Rule('AB_bind', A(b=None) + B(a=None) <> A(b=1) % B(a=1), kab, lab)
 #species, reactions, reactions_bidirectional, observables
 pysb.bng.generate_equations(model)
 ##### DIFFUSIVITIES
-model.diffusivities = [1.]*len(model.species)
-#model.diffusivities = [1., 1., 1.]
+# model.diffusivities = [1.]*len(model.species)
+model.diffusivities = [1.5, 1., 3]
 #####
 print
 print '##################################~PYSB~##################################'
@@ -66,7 +66,7 @@ import numpy
 import re
 
 """Create Mesh"""
-# m = fipy.Grid1D(nx=100, Lx=1.)
+m = fipy.Grid1D(nx=100, Lx=1.)
 mm = fipy.Grid2D(nx=100, ny=100, Lx=1., Ly=1.)
 m3 = fipy.Gmsh2DIn3DSpace('''
      radius = 5.0;
@@ -146,7 +146,7 @@ for ode in model.odes:
     ode=str(ode)
     print ode
     ##modify SPECIES
-    ode = re.sub(r'_*s(\d+)', lambda m: 'v[%s]' % (int(m.group(1))), ode)
+    ode = re.sub('_*s(\d+)', lambda m: 'v[%s]' % (int(m.group(1))), ode)
 #    for i in range(len(model.odes)):
 #        ode = re.sub('__s%d' % i, 'v[%d]' % i, ode)
     ##modify RATE CONSTANT
@@ -205,15 +205,38 @@ eqn = fipy.TransientTerm(U) == fipy.DiffusionTerm([M]) + (Q)
 
 
 """Perform Integration"""
-s=[]
-v0 = v[0]
-v1 = v[1]
-v2 = v[2]
-v0.name = "v0_sol"
-v1.name = "v1_sol"
-v2.name = "v2_sol"
-vi = fipy.Viewer(vars=v2)
+# s=[]
+    
+    
+# v0 = v[0]
+# v1 = v[1]
+# v2 = v[2]
+# 
+# v0.name = "v0_sol"
+# v1.name = "v1_sol"
+# v2.name = "v2_sol"
+# print type(v0)
+# print v0.name
+# print v[0].name
+# print
+# print type(v[0])
+# v[0].name ='hh'
+# 
+# print type(v)
+# print type(v[0])
+# print v.elementshape
+test = []
+for i in range(len(v)):
+     test.append(v[i])
+     test[-1].name = "v%d_sol" % i 
+#      v[i].name = "v%d_sol" % i 
+#      var.name = "v%d_sol" % i 
+vi = fipy.Viewer(vars=test[0])
 vi.plot()
+# vi2 = fipy.Viewer(vars=v[0])
+# vi2.plot()
+# vi2 = fipy.Viewer(vars=v[2])
+# vi2.plot()
 
 # for j in range(len(model.species)):
 #     s.append(v[j])
@@ -226,6 +249,8 @@ for t in range(len(time)):
      v.updateOld()
      eqn.solve(var=v, dt=time[1])
      vi.plot()
+#      vi2.plot()
+     
 # for t in range(len(time)):
 #      print t
 #      print time[1]
