@@ -29,11 +29,12 @@ Equality.do = do
 
 '''To import mt1_mmp system'''
 model = mt1_mmp_model.return_model('original')
+'''To generate ODEs'''
 pysb.bng.generate_equations(model)
 #print len(model.reactions)
 #print len(model.species)
 #print model.species
-print model.reactions
+#print model.reactions
 
 # this gets the conservation laws (cl) and their constant values (cl_values)
 '''Go to stoichiometry_conservation_laws.py'''
@@ -83,6 +84,8 @@ for rule in model.rules:
                         #Rule 'ab': [(1, 0), (10, 0), (4, 0), (9, 0), (7, 0)]
                         #Rule 'bc': [(1, 8), (1, 2), (1, 5), (1, 7), (3, 8), (3, 2), (3, 5), (3, 7)]
                         #Rule 'cc': [(2, 2), (2, 4), (2, 6), (4, 2), (4, 4), (4, 6), (6, 2), (6, 4), (6, 6)]
+    '''From this, we have the list of reactions that involved in each rule'''
+    
 
     '''Getting the reaction rate of interactions'''
     for interaction in interactions:
@@ -128,7 +131,7 @@ new_units = {}
 for rc in rcts_rules:
     var = sympy.simplify(sympy.factor(rcts_rules[rc]['no_reverse'])).as_coeff_mul()[1]
     '''To separate Var on each term and storage them as element of tuple'''
-    print var
+    #print var
             #'cc': 
             #(1.00000000000000, kcc, (__s2 + __s4 + __s6)**2)
             #'ab': 
@@ -137,7 +140,7 @@ for rc in rcts_rules:
             #(kbc, __s1 + __s3, __s2 + 2*__s5 + __s7 + __s8)
     final_vars = [ex for ex in var if (str(ex).startswith('__') or type(ex) == sympy.Pow or type(ex) == sympy.Add)]
     '''Get and remember the Var only with s0,s1,...'''
-    print final_vars
+    #print final_vars
             #'cc':
             #[(__s2 + __s4 + __s6)**2]
             #'ab': 
@@ -146,7 +149,7 @@ for rc in rcts_rules:
             #[__s1 + __s3, __s2 + 2*__s5 + __s7 + __s8]
     new_units[rc] = final_vars
     '''Storage the var to new_units Dict for each rcts_rules'''
-    print new_units
+    #print new_units
                     #1st loop:
                     #{'cc': [(__s2 + __s4 + __s6)**2]}
                     
@@ -159,17 +162,43 @@ for rc in rcts_rules:
                     #'ab': [__s0, __s1 + __s10 + __s4 + __s7 + 2*__s9], 
                     #'bc': [__s1 + __s3, __s2 + 2*__s5 + __s7 + __s8]}
 '''From this we have list of term that will be defined as new variable'''
-'''To be continued!!'''
 
+
+'''To write Group ODEs'''
 # this defines the odes for the new units
 new_units_odes = {}
 for r in new_units:
     for eq in new_units[r]:
         if type(eq) == sympy.Pow:
+            '''get the inside of pow'''
             eq_name = eq.args[0]
+            print eq.args[0] 
+                            #__s2 + __s4 + __s6
             new_units_odes[eq_name] = sympy.simplify(rcts_rules[r]['reverse'] - rcts_rules[r]['no_reverse'])
+            print new_units_odes
+                                #{__s2 + __s4 + __s6: -1.0*kcc*(__s2 + __s4 + __s6)**2 + 2*lcc*(__s10 + __s11 + __s5 + __s7 + __s8 + __s9)}
         else:
             new_units_odes[eq] = rcts_rules[r]['reverse'] - rcts_rules[r]['no_reverse']
+            print new_units_odes
+                                #{__s2 + __s4 + __s6: -1.0*kcc*(__s2 + __s4 + __s6)**2 + 2*lcc*(__s10 + __s11 + __s5 + __s7 + __s8 + __s9), 
+                                #__s0: -__s0*kab*(__s1 + __s10 + __s4 + __s7 + 2*__s9)}
+
+                                #{__s2 + __s4 + __s6: -1.0*kcc*(__s2 + __s4 + __s6)**2 + 2*lcc*(__s10 + __s11 + __s5 + __s7 + __s8 + __s9), 
+                                #__s1 + __s10 + __s4 + __s7 + 2*__s9: -__s0*kab*(__s1 + __s10 + __s4 + __s7 + 2*__s9), 
+                                #__s0: -__s0*kab*(__s1 + __s10 + __s4 + __s7 + 2*__s9)}
+
+                                #{__s2 + __s4 + __s6: -1.0*kcc*(__s2 + __s4 + __s6)**2 + 2*lcc*(__s10 + __s11 + __s5 + __s7 + __s8 + __s9), 
+                                #__s1 + __s10 + __s4 + __s7 + 2*__s9: -__s0*kab*(__s1 + __s10 + __s4 + __s7 + 2*__s9), 
+                                #__s0: -__s0*kab*(__s1 + __s10 + __s4 + __s7 + 2*__s9), 
+                                #__s1 + __s3: -kbc*(__s1 + __s3)*(__s2 + 2*__s5 + __s7 + __s8) + lbc*(2*__s10 + 2*__s11 + __s4 + __s6 + __s7 + __s8 + 2*__s9)}
+
+                                #{__s2 + __s4 + __s6: -1.0*kcc*(__s2 + __s4 + __s6)**2 + 2*lcc*(__s10 + __s11 + __s5 + __s7 + __s8 + __s9), 
+                                #__s1 + __s10 + __s4 + __s7 + 2*__s9: -__s0*kab*(__s1 + __s10 + __s4 + __s7 + 2*__s9), 
+                                #__s2 + 2*__s5 + __s7 + __s8: -kbc*(__s1 + __s3)*(__s2 + 2*__s5 + __s7 + __s8) + lbc*(2*__s10 + 2*__s11 + __s4 + __s6 + __s7 + __s8 + 2*__s9), 
+                                #__s0: -__s0*kab*(__s1 + __s10 + __s4 + __s7 + 2*__s9), 
+                                #__s1 + __s3: -kbc*(__s1 + __s3)*(__s2 + 2*__s5 + __s7 + __s8) + lbc*(2*__s10 + 2*__s11 + __s4 + __s6 + __s7 + __s8 + 2*__s9)}
+'''From this, we have group of ODEs'''
+
 
 # this adds more conservation laws from the reactions
 for idx, nam in enumerate(new_units):
@@ -178,6 +207,7 @@ for idx, nam in enumerate(new_units):
         new_cons_value = conservation_laws_values(model, new_cons)
         cl.append(new_cons)
         cl_values[new_cons_value.keys()[0]] = new_cons_value.values()[0]
+
 
 # this uses the conservation laws to define the new units in terms of the other variables
 equal_units = {}
