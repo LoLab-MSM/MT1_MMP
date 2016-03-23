@@ -199,8 +199,8 @@ for r in new_units:
                                 #__s1 + __s3: -kbc*(__s1 + __s3)*(__s2 + 2*__s5 + __s7 + __s8) + lbc*(2*__s10 + 2*__s11 + __s4 + __s6 + __s7 + __s8 + 2*__s9)}
 '''From this, we have group of ODEs'''
 
-
-# this adds more conservation laws from the reactions
+'''TO BE CONTINUED'''
+'''this adds more conservation laws from the reactions'''
 for idx, nam in enumerate(new_units):
     if len(new_units[nam]) > 1:
         new_cons = new_units[nam][0] - new_units[nam][1] - sympy.symbols('b%d' % idx, real=True)
