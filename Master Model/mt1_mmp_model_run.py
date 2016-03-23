@@ -2,6 +2,7 @@ from pysb.integrate import odesolve
 import numpy as np
 import pylab as pl
 import mt1_mmp_model
+from pysb.bng import generate_equations
 #from MT1_MMP import mt1_mmp_model as mt1mmp2
 
 model=mt1_mmp_model.return_model('original')
@@ -9,11 +10,24 @@ model2=mt1_mmp_model.return_model('abremoved')
 model3=mt1_mmp_model.return_model('abc1removed')
 model4=mt1_mmp_model.return_model('abc2removed')
 
+generate_equations(model)
+print model.species
+quit()
+
+import stoichiometry_analysis as sto
+conserv_laws = sto.conservation_relations(model)
+
+
+print conserv_laws
+
+
+
 t=np.linspace(0,30000,10000)
 t2=np.linspace(0,5,500)
-zouty = odesolve(model,t2, integrator='vode', with_jacobian=True, rtol=1e-20, atol=1e-20, verbose=True)
+zouty = odesolve(model,t2, integrator='vode', with_jacobian=True, rtol=1e-20, atol=1e-20)
 #print model.odes
 #print zout
+
 
 #to simulate abcc(infinity) vs b(0)
 initb = np.logspace(-9,-5, 100)

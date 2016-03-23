@@ -56,7 +56,6 @@ def rdesolve(model, mesh, initc, bound): #Diffusifity, Dirichlet = None, Neumann
 #      if __name__ == '__main__':
 #          raw_input("Explicit transient diffusion. Press <return> to proceed...")
 
-
      """"create mess on the domain solution"""
      mesh = mesh
      if  mesh[0] == '1d':

@@ -46,4 +46,4 @@ print type(model.odes[0])
 w = model.odes[0]+model.odes[1]
 
 #r = model.odes[0] - __s2*l #???
-print w
+print model.species

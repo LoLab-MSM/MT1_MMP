@@ -17,6 +17,8 @@ bc_model.rule_original_bc_model()
 bc_model.initial_condition_bc_model()
 
 bc_model.observe_bc_model()
+print model.monomers.keys()
+quit()
 
 t=np.linspace(0,5,100)
 
