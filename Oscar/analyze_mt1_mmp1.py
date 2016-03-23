@@ -6,8 +6,8 @@ import itertools
 from stoichiometry_conservation_laws import conservation_relations, conservation_laws_values
 from sympy.core.relational import Equality
 
-
-def do(self, e, i=None):
+'''???????'''
+def do(self, e, i=None): 
     """do `e` to both sides of self using function given or
     model expression with a variable representing each side:
     >> eq.do(i + 2)  # add 2 to both sides of Equality
@@ -27,6 +27,7 @@ def do(self, e, i=None):
 
 Equality.do = do
 
+'''To import mt1_mmp system'''
 model = mt1_mmp_model.return_model('original')
 pysb.bng.generate_equations(model)
 #print len(model.reactions)
@@ -35,12 +36,14 @@ pysb.bng.generate_equations(model)
 print model.reactions
 
 # this gets the conservation laws (cl) and their constant values (cl_values)
-cl, cl_values = conservation_relations(model)
+'''Go to stoichiometry_conservation_laws.py'''
+cl, cl_values = conservation_relations(model) 
+'''From this, we have MCL'''
+
+
 # this loops over the model reactions and storage in rcts_rules the reverse and no reverse reaction
 # for each rule
-
 rcts_rules = {}
-
 for rule in model.rules:
     '''To storage reactants of reaction for each rule'''
     #untuk setiap rule, reaksi yang yang memiliki rule yg sama akan disimpan di rule_reactants.
@@ -50,7 +53,8 @@ for rule in model.rules:
     for reaction in model.reactions:
         if reaction['rule'][0] == rule.name and reaction['reverse'][0] == False:
             rule_reactants.append(reaction['reactants'])
-    print rule_reactants '''Printed for each rule'''
+    '''Printed for each rule'''
+    #print rule_reactants 
                         #Rule 'ab': [(0, 1), (0, 4), (0, 7), (0, 9), (0, 10)]
                         #Rule 'bc': [(1, 2), (1, 5), (2, 3), (3, 5), (1, 7), (1, 8), (3, 7), (3, 8)]
                         #Rule 'cc': [(2, 2), (2, 4), (4, 4), (2, 6), (4, 6), (6, 6)]
@@ -59,20 +63,23 @@ for rule in model.rules:
     G = networkx.Graph()
     G.add_edges_from(rule_reactants)
     sp_interactions = [G[node].keys() for node in networkx.nodes(G)]
-    print sp_interactions '''Printed for each rule'''
+    '''Printed for each rule'''
+    #print sp_interactions 
                         #Rule 'ab': [[1, 10, 4, 9, 7], [0], [0], [0], [0], [0]]
                         #Rule 'bc': [[8, 2, 5, 7], [1, 3], [8, 2, 5, 7], [1, 3], [1, 3], [1, 3]]
                         #Rule 'cc': [[2, 4, 6], [2, 4, 6], [2, 4, 6]]
     vars_set = set(map(tuple, sp_interactions))
     final_vars = map(list, vars_set)
-    print final_vars'''Printed for each rule''' 
+    '''Printed for each rule''' 
+    #print final_vars
                     #Rule 'ab': [[1, 10, 4, 9, 7], [0]]
                     #Rule 'bc': [[1, 3], [8, 2, 5, 7]]
                     #Rule 'cc': [[2, 4, 6]]
     if len(final_vars) == 1:
         final_vars.append(final_vars[0])
     interactions = list(itertools.product(*final_vars))
-    print interactions '''Printed for each rule'''
+    '''Printed for each rule'''
+    #print interactions 
                         #Rule 'ab': [(1, 0), (10, 0), (4, 0), (9, 0), (7, 0)]
                         #Rule 'bc': [(1, 8), (1, 2), (1, 5), (1, 7), (3, 8), (3, 2), (3, 5), (3, 7)]
                         #Rule 'cc': [(2, 2), (2, 4), (2, 6), (4, 2), (4, 4), (4, 6), (6, 2), (6, 4), (6, 6)]
@@ -100,25 +107,59 @@ for rule in model.rules:
                     rcts_reverse += reaction['rate']
     '''ODE for each rule'''
     rcts_rules[rule.name] = {'no_reverse': sympy.factor(rcts_no_reverse), 'reverse': sympy.factor(rcts_reverse)}
-    print rcts_rules '''Printed for each rule'''
-                    #Rule 'ab': 
+    '''Printed for each rule'''
+    #print rcts_rules 
+                    #1st loop:
                     #{'ab': {'no_reverse': __s0*kab*(__s1 + __s10 + __s4 + __s7 + 2*__s9), 'reverse': 0}}
                     
-                    #Rule 'bc': 
+                    #2nd loop:
                     #{'ab': {'no_reverse': __s0*kab*(__s1 + __s10 + __s4 + __s7 + 2*__s9), 'reverse': 0}, 
                     #'bc': {'no_reverse': kbc*(__s1 + __s3)*(__s2 + 2*__s5 + __s7 + __s8), 'reverse': lbc*(2*__s10 + 2*__s11 + __s4 + __s6 + __s7 + __s8 + 2*__s9)}}
                     
-                    #Rule 'cc': 
+                    #3rd loop:
                     #{'cc': {'no_reverse': 1.0*kcc*(1.0*__s2 + 1.0*__s4 + 1.0*__s6)**2, 'reverse': 2*lcc*(__s10 + __s11 + __s5 + __s7 + __s8 + __s9)}, 
                     #'ab': {'no_reverse': __s0*kab*(__s1 + __s10 + __s4 + __s7 + 2*__s9), 'reverse': 0}, 
                     #'bc': {'no_reverse': kbc*(__s1 + __s3)*(__s2 + 2*__s5 + __s7 + __s8), 'reverse': lbc*(2*__s10 + 2*__s11 + __s4 + __s6 + __s7 + __s8 + 2*__s9)}}
-
+'''From this, we have the group ODEs'''
+    
+    
 # this line loops over the reactions and factor the monomials and that way  we get the new units
 new_units = {}
 for rc in rcts_rules:
     var = sympy.simplify(sympy.factor(rcts_rules[rc]['no_reverse'])).as_coeff_mul()[1]
+    '''To separate Var on each term and storage them as element of tuple'''
+    print var
+            #'cc': 
+            #(1.00000000000000, kcc, (__s2 + __s4 + __s6)**2)
+            #'ab': 
+            #(__s0, kab, __s1 + __s10 + __s4 + __s7 + 2*__s9)
+            #'bc': 
+            #(kbc, __s1 + __s3, __s2 + 2*__s5 + __s7 + __s8)
     final_vars = [ex for ex in var if (str(ex).startswith('__') or type(ex) == sympy.Pow or type(ex) == sympy.Add)]
+    '''Get and remember the Var only with s0,s1,...'''
+    print final_vars
+            #'cc':
+            #[(__s2 + __s4 + __s6)**2]
+            #'ab': 
+            #[__s0, __s1 + __s10 + __s4 + __s7 + 2*__s9]
+            #'bc': 
+            #[__s1 + __s3, __s2 + 2*__s5 + __s7 + __s8]
     new_units[rc] = final_vars
+    '''Storage the var to new_units Dict for each rcts_rules'''
+    print new_units
+                    #1st loop:
+                    #{'cc': [(__s2 + __s4 + __s6)**2]}
+                    
+                    #2nd loop:
+                    #{'cc': [(__s2 + __s4 + __s6)**2], 
+                    #'ab': [__s0, __s1 + __s10 + __s4 + __s7 + 2*__s9]}
+                    
+                    #3rd loop:
+                    #{'cc': [(__s2 + __s4 + __s6)**2], 
+                    #'ab': [__s0, __s1 + __s10 + __s4 + __s7 + 2*__s9], 
+                    #'bc': [__s1 + __s3, __s2 + 2*__s5 + __s7 + __s8]}
+'''From this we have list of term that will be defined as new variable'''
+'''To be continued!!'''
 
 # this defines the odes for the new units
 new_units_odes = {}
