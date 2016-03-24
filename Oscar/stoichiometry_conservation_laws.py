@@ -61,12 +61,37 @@ def conservation_relations(model, pruned_system=None):
     species_info = OrderedDict()
     for sp in model_species:
         species_info[str(sp)] = sympy.Symbol('__s%d' % model.get_species_index(sp))
+    '''Var Data'''
+    #print species_info
+                    #OrderedDict([('A1(a1=None, a2=None)', __s0), 
+                    #('A2(a1=None, a3=None)', __s1), 
+                    #('A3(a2=None)', __s2), 
+                    #('A1(a1=1, a2=None) % A1(a1=1, a2=None)', __s3), 
+                    #('A1(a1=None, a2=1) % A2(a1=1, a3=None)', __s4), 
+                    #('A2(a1=None, a3=1) % A3(a2=1)', __s5), 
+                    #('A1(a1=1, a2=2) % A1(a1=1, a2=None) % A2(a1=2, a3=None)', __s6), 
+                    #('A1(a1=1, a2=2) % A1(a1=1, a2=3) % A2(a1=2, a3=None) % A2(a1=3, a3=None)', __s7), 
+                    #('A1(a1=None, a2=1) % A2(a1=1, a3=2) % A3(a2=2)', __s8), 
+                    #('A1(a1=1, a2=2) % A1(a1=1, a2=None) % A2(a1=2, a3=3) % A3(a2=3)', __s9), 
+                    #('A1(a1=1, a2=2) % A1(a1=1, a2=3) % A2(a1=3, a3=4) % A2(a1=2, a3=None) % A3(a2=4)', __s10), 
+                    #('A1(a1=1, a2=2) % A1(a1=1, a2=3) % A2(a1=2, a3=4) % A2(a1=3, a3=5) % A3(a2=4) % A3(a2=5)', __s11)])
+
     sto_augmented = np.concatenate((stoichiometry, np.identity(stoichiometry.shape[0])), axis=1)
     sto_augmented = sympy.Matrix(sto_augmented)
     sto_reduced = sto_augmented.rref()[0]
     conservation_matrix = sto_reduced[sto_rank:, stoichiometry.shape[1]:]
     conservation_matrix = conservation_matrix.applyfunc(sympy.Integer)
-    conservation_laws = conservation_matrix.dot(species_info.values()) #the mcl equations
+    '''Conservation Matrix'''
+    #print conservation_matrix
+                            #Matrix([[1, 0, 0, 2, 1, 0, 2, 2, 1, 2, 2, 2], 
+                            #[0, 1, 0, 0, 1, 1, 1, 2, 1, 1, 2, 2], 
+                            #[0, 0, 1, 0, 0, 1, 0, 0, 1, 1, 1, 2]])
+    conservation_laws = conservation_matrix.dot(species_info.values())
+    '''The MCL Eqs'''
+    #print conservation_laws
+                        #[__s0 + 2*__s10 + 2*__s11 + 2*__s3 + __s4 + 2*__s6 + 2*__s7 + __s8 + 2*__s9,
+                        # __s1 + 2*__s10 + 2*__s11 + __s4 + __s5 + __s6 + 2*__s7 + __s8 + __s9, 
+                        #__s10 + 2*__s11 + __s2 + __s5 + __s8 + __s9]
     if not isinstance(conservation_laws, list):
         conservation_laws = [conservation_laws]
 
