@@ -56,10 +56,17 @@ def conservation_relations(model, pruned_system=None):
     else:
         stoichiometry = stoichiometry_matrix(model)
         model_species = model.species
-
+    
+    #print stoichiometry
+            #[[-1.  1.]
+            #[-1.  1.]
+            #[ 1. -1.]]
     sto_rank = np.linalg.matrix_rank(stoichiometry)
+    #print sto_rank 
+                #1
     species_info = OrderedDict()
     for sp in model_species:
+        #print str(sp)
         species_info[str(sp)] = sympy.Symbol('__s%d' % model.get_species_index(sp))
     '''Var Data'''
     #print species_info
@@ -76,13 +83,24 @@ def conservation_relations(model, pruned_system=None):
                     #('A1(a1=1, a2=2) % A1(a1=1, a2=3) % A2(a1=3, a3=4) % A2(a1=2, a3=None) % A3(a2=4)', __s10), 
                     #('A1(a1=1, a2=2) % A1(a1=1, a2=3) % A2(a1=2, a3=4) % A2(a1=3, a3=5) % A3(a2=4) % A3(a2=5)', __s11)])
 
-    sto_augmented = np.concatenate((stoichiometry, np.identity(stoichiometry.shape[0])), axis=1)
+    sto_augmented = np.concatenate((stoichiometry, np.identity(stoichiometry.shape[0])), axis=1) #adding I at next column
+    print sto_augmented
+                        #[[-1.  1.  1.  0.  0.]
+                        #[-1.  1.  0.  1.  0.]
+                        #[ 1. -1.  0.  0.  1.]]
     sto_augmented = sympy.Matrix(sto_augmented)
-    sto_reduced = sto_augmented.rref()[0]
-    conservation_matrix = sto_reduced[sto_rank:, stoichiometry.shape[1]:]
+    sto_reduced = sto_augmented.rref()[0] #getting the reduced echelon form matrix
+    #print sto_reduced
+                    #In Matrix[[]] format.
+                    #[1, -1, 0, 0, 1], 
+                    #[0, 0, 1, 0, 1], 
+                    #[0, 0, 0, 1, 1]
+    #print stoichiometry.shape[1]
+    conservation_matrix = sto_reduced[sto_rank:, stoichiometry.shape[1]:] #sto_reduced['rank menentukan mulai row brp', 'shape[1] == number of reactions in matrix menentukan mulai column brp'] 
+                                                                            #sto_reduced[1:,2:]
     conservation_matrix = conservation_matrix.applyfunc(sympy.Integer)
     '''Conservation Matrix'''
-    #print conservation_matrix
+    print conservation_matrix
                             #Matrix([[1, 0, 0, 2, 1, 0, 2, 2, 1, 2, 2, 2], 
                             #[0, 1, 0, 0, 1, 1, 1, 2, 1, 1, 2, 2], 
                             #[0, 0, 1, 0, 0, 1, 0, 0, 1, 1, 1, 2]])
@@ -100,4 +118,4 @@ def conservation_relations(model, pruned_system=None):
 
     value_constants = conservation_laws_values(model, conservation_laws)
 
-    return conservation_laws, value_constants
+    return conservation_laws, value_constants, species_info

@@ -1,5 +1,17 @@
 from pysb import *
 
+def test():
+    Monomer('A1',['a2'])
+    Monomer('A2',['a1'])
+    
+    Parameter('k_A1_A2', 2.74e6)
+    Parameter('l_A1_A2', 2e-4)
+    
+    Rule('A1_A2', A1(a2=None) + A2(a1=None) <> A1(a2=1)%A2(a1=1), k_A1_A2, l_A1_A2)
+    
+    Initial(A1(a2=None), Parameter('A1_0', 1e-6))
+    Initial(A2(a1=None), Parameter('A2_0', 1.57e-7))
+
 '''A_(n)-A_(n-1)-...-A_2-A_1>'''
 
 def two_monomers():
@@ -48,4 +60,6 @@ def return_model(model_type):
         two_monomers()
     if model_type=='3_monomers':
         three_monomers()
+    if model_type=='testt':
+        test()
     return model

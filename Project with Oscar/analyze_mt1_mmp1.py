@@ -35,30 +35,40 @@ pysb.bng.generate_equations(model)
 #print len(model.species)
 #print model.species
 #print model.reactions
+#for i in model.reactions:
+#    if i['reactants'] == (2,7):
+#        print i['rate']
 
 # this gets the conservation laws (cl) and their constant values (cl_values)
 '''Go to stoichiometry_conservation_laws.py'''
-cl, cl_values = conservation_relations(model) 
+cl, cl_values, sp_info = conservation_relations(model) 
 '''From this, we have MCL'''
+
 
 # this loops over the model reactions and storage in rcts_rules the reverse and no reverse reaction
 # for each rule
 rcts_rules = {}
+mcl_rules = {}
 for rule in model.rules:
     '''To storage reactants of reaction for each rule'''
     #untuk setiap rule, reaksi yang yang memiliki rule yg sama akan disimpan di rule_reactants.
     rcts_no_reverse = 0
     rcts_reverse = 0
     rule_reactants = []
+    #rule_products = []
     for reaction in model.reactions:
         if reaction['rule'][0] == rule.name and reaction['reverse'][0] == False:
             rule_reactants.append(reaction['reactants'])
+            #rule_products.append(reaction['products'][0])
     '''Printed for each rule'''
-    #print rule_reactants 
+    #print rule_reactants
                         #Rule 'A1_A1': [(0, 0), (0, 4), (4, 4), (0, 8), (4, 8), (8, 8)]
                         #Rule 'A1_A2': [(0, 1), (0, 5), (1, 3), (3, 5), (1, 6), (5, 6), (1, 9), (5, 9)]
                         #Rule 'A2_A3': [(1, 2), (2, 4), (2, 6), (2, 7), (2, 10)]
-    
+    #print rule_products
+                        #Rule 'A1_A1': [3, 6, 7, 9, 10, 11]
+                        #Rule 'A1_A2': [4, 8, 6, 9, 7, 10, 10, 11]
+                        #Rule 'A2_A3': [5, 8, 9, 10, 11]
     '''?????'''
     G = networkx.Graph()
     G.add_edges_from(rule_reactants)
@@ -85,7 +95,7 @@ for rule in model.rules:
                         #Rule 'A2_A3': [(2, 1), (2, 10), (2, 4), (2, 6), (2, 7)]
     '''From this, we have the list of reactions that involved in each rule'''
     
-
+    
     '''Getting the reaction rate of interactions'''
     for interaction in interactions:
         for reaction in model.reactions:
@@ -121,8 +131,8 @@ for rule in model.rules:
                     #3rd loop:
                     #{'A1_A2': {'no_reverse': k_A1_A2*(__s1 + __s5)*(__s0 + 2*__s3 + __s6 + __s9), 'reverse': l_A1_A2*(2*__s10 + 2*__s11 + __s4 + __s6 + 2*__s7 + __s8 + __s9)}, 
                     #'A1_A1': {'no_reverse': 1.0*k_A1_A1*(1.0*__s0 + 1.0*__s4 + 1.0*__s8)**2, 'reverse': 2*l_A1_A1*(__s10 + __s11 + __s3 + __s6 + __s7 + __s9)}, 
-                    #'A2_A3': {'no_reverse': __s2*k_A2_A3*(__s1 + __s10 + __s4 + __s6 + 2*__s7), 'reverse': 0}}
-
+                    #'A2_A3': {'no_reverse': __s2*k_A2_A3*(__s1 + __s10 + __s4 + __s6 + 2*__s7), 'reverse': 0}} 
+    
 '''From this, we have the group ODEs'''
     
     
@@ -184,16 +194,25 @@ mcl = {}
 for idx, rule in enumerate(new_units):
     if type(new_units[rule][0]) == sympy.Pow:
         var_name = new_units[rule][0].args[0]
-        mcl[rule] = sympy.simplify(var_name + 2*new_units[rule][-1] - sympy.symbols('z%d' % idx, real=True))
+        mcl[rule] = sympy.factor(var_name + 2*new_units[rule][-1] - sympy.symbols('z%d' % idx, real=True))
     else:
-        mcl[rule] = [sympy.simplify(new_units[rule][0] + new_units[rule][-1] - sympy.symbols('z%d' % idx, real=True)), sympy.simplify(new_units[rule][1] - new_units[rule][0] - sympy.symbols('q%d' % idx, real=True))]
-#print mcl
+        mcl[rule] = [sympy.factor(new_units[rule][0] + new_units[rule][-1] - sympy.symbols('z%d' % idx, real=True)), sympy.factor(new_units[rule][1] - new_units[rule][0] - sympy.symbols('q%d' % idx, real=True))]
+print mcl
         #{'A1_A2': [__s1 + 2*__s10 + 2*__s11 + __s4 + __s5 + __s6 + 2*__s7 + __s8 + __s9 - z0, __s0 - __s1 + 2*__s3 - __s5 + __s6 + __s9 - q0], 
         #'A1_A1': __s0 + 2*__s10 + 2*__s11 + 2*__s3 + __s4 + 2*__s6 + 2*__s7 + __s8 + 2*__s9 - z1, 
         #'A2_A3': [__s1 + __s10 + __s2 + __s4 + __s6 + 2*__s7 - z2, __s1 + __s10 - __s2 + __s4 + __s6 + 2*__s7 - q2]}
 
-
 quit()
+
+#for sp in model.species:
+ #   tot_mon[sp] =
+
+
+# print sp_info.values()
+# for sp in model.species:
+#         print sp_info[str(sp)]
+
+
 '''To write Group ODEs'''
 # this defines the odes for the new units
 new_units_odes = {}
@@ -232,7 +251,7 @@ for r in new_units:
 '''From this, we have group of ODEs'''
 
 
-'''TO BE CONTINUED'''
+'''LEARNED TILL HERE'''
 '''this adds more conservation laws from the reactions'''
 for idx, nam in enumerate(new_units):
     if len(new_units[nam]) > 1:
