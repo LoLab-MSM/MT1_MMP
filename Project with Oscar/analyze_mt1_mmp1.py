@@ -1,9 +1,9 @@
-import mt1_mmp_model
+import mt1_mmp_model1
 import pysb.bng
 import sympy
 import networkx
 import itertools
-from stoichiometry_conservation_laws import conservation_relations, conservation_laws_values
+from stoichiometry_conservation_laws1 import conservation_relations, conservation_laws_values
 from sympy.core.relational import Equality
 
 '''???????'''
