@@ -28,7 +28,7 @@ def do(self, e, i=None):
 Equality.do = do
 
 '''To import mt1_mmp system'''
-model = mt1_mmp_model.return_model('3_monomers')
+model = mt1_mmp_model1.return_model('3_monomers')
 '''To generate ODEs'''
 pysb.bng.generate_equations(model)
 #print len(model.reactions)
@@ -41,7 +41,7 @@ pysb.bng.generate_equations(model)
 
 # this gets the conservation laws (cl) and their constant values (cl_values)
 '''Go to stoichiometry_conservation_laws.py'''
-cl, cl_values, sp_info = conservation_relations(model) 
+cl, cl_values = conservation_relations(model) 
 '''From this, we have MCL'''
 
 
@@ -119,6 +119,7 @@ for rule in model.rules:
                     rcts_reverse += reaction['rate']
     '''ODE for each rule'''
     rcts_rules[rule.name] = {'no_reverse': sympy.factor(rcts_no_reverse), 'reverse': sympy.factor(rcts_reverse)}
+    #print rcts_rules[rule.name]
     '''Printed for each rule'''
     #print rcts_rules 
                     #1st loop:
@@ -131,7 +132,7 @@ for rule in model.rules:
                     #3rd loop:
                     #{'A1_A2': {'no_reverse': k_A1_A2*(__s1 + __s5)*(__s0 + 2*__s3 + __s6 + __s9), 'reverse': l_A1_A2*(2*__s10 + 2*__s11 + __s4 + __s6 + 2*__s7 + __s8 + __s9)}, 
                     #'A1_A1': {'no_reverse': 1.0*k_A1_A1*(1.0*__s0 + 1.0*__s4 + 1.0*__s8)**2, 'reverse': 2*l_A1_A1*(__s10 + __s11 + __s3 + __s6 + __s7 + __s9)}, 
-                    #'A2_A3': {'no_reverse': __s2*k_A2_A3*(__s1 + __s10 + __s4 + __s6 + 2*__s7), 'reverse': 0}} 
+                    #'A2_A3': {'no_reverse': __s2*k_A2_A3*(__s1 + __s10 + __s4 + __s6 + 2*__s7), 'reverse': l_A2_A3*(__s10 + 2*__s11 + __s5 + __s8 + __s9}} 
     
 '''From this, we have the group ODEs'''
     
@@ -157,7 +158,7 @@ for rc in rcts_rules:
             #'A1_A1': 
             #(l_A1_A1, __s10 + __s11 + __s3 + __s6 + __s7 + __s9)
             #'A2_A3':
-            #() 
+            #(l_A2_A3, __s10 + 2*__s11 + __s5 + __s8 + __s9)
     final_vars = [ex for ex in var if (str(ex).startswith('__') or type(ex) == sympy.Pow or type(ex) == sympy.Add)]
     '''Adding the reverse var'''
     final_vars_reverse = [ex for ex in var_reverse if (str(ex).startswith('__') or type(ex) == sympy.Add)]
@@ -171,11 +172,11 @@ for rc in rcts_rules:
             #'A1_A1': 
             #[(__s0 + __s4 + __s8)**2, __s10 + __s11 + __s3 + __s6 + __s7 + __s9]
             #'A2_A3': 
-            #[__s2, __s1 + __s10 + __s4 + __s6 + 2*__s7]
+            #[__s2, __s1 + __s10 + __s4 + __s6 + 2*__s7, __s10 + 2*__s11 + __s5 + __s8 + __s9]
         
     new_units[rc] = final_vars
     '''Storage the var to new_units Dict for each rcts_rules'''
-    #print new_units
+    print new_units
                     #1st loop:
                     #{'A1_A2': [__s1 + __s5, __s0 + 2*__s3 + __s6 + __s9, 2*__s10 + 2*__s11 + __s4 + __s6 + 2*__s7 + __s8 + __s9]}
                     
@@ -187,7 +188,7 @@ for rc in rcts_rules:
                     #3rd loop:
                     #{'A1_A2': [__s1 + __s5, __s0 + 2*__s3 + __s6 + __s9, 2*__s10 + 2*__s11 + __s4 + __s6 + 2*__s7 + __s8 + __s9], 
                     #'A1_A1': [(__s0 + __s4 + __s8)**2, __s10 + __s11 + __s3 + __s6 + __s7 + __s9], 
-                    #'A2_A3': [__s2, __s1 + __s10 + __s4 + __s6 + 2*__s7]}
+                    #'A2_A3': [__s2, __s1 + __s10 + __s4 + __s6 + 2*__s7, __s10 + 2*__s11 + __s5 + __s8 + __s9]}
 
 '''MCL from group ODEs'''
 mcl = {}
@@ -200,17 +201,9 @@ for idx, rule in enumerate(new_units):
 print mcl
         #{'A1_A2': [__s1 + 2*__s10 + 2*__s11 + __s4 + __s5 + __s6 + 2*__s7 + __s8 + __s9 - z0, __s0 - __s1 + 2*__s3 - __s5 + __s6 + __s9 - q0], 
         #'A1_A1': __s0 + 2*__s10 + 2*__s11 + 2*__s3 + __s4 + 2*__s6 + 2*__s7 + __s8 + 2*__s9 - z1, 
-        #'A2_A3': [__s1 + __s10 + __s2 + __s4 + __s6 + 2*__s7 - z2, __s1 + __s10 - __s2 + __s4 + __s6 + 2*__s7 - q2]}
+        #'A2_A3': [__s10 + 2*__s11 + __s2 + __s5 + __s8 + __s9 - z2, __s1 + __s10 - __s2 + __s4 + __s6 + 2*__s7 - q2]}
 
 quit()
-
-#for sp in model.species:
- #   tot_mon[sp] =
-
-
-# print sp_info.values()
-# for sp in model.species:
-#         print sp_info[str(sp)]
 
 
 '''To write Group ODEs'''

@@ -12,25 +12,25 @@ from pysb import *
 def monomer_abc_model():
     """Let a, b, and c be MMP2, TIMP2, and MT1-MMP, respectivelly.
     Monomer a has only one binding site. Each of monomer b and c has two sites"""
-    Monomer('A',['b'])
-    Monomer('B',['a','c'])
-    Monomer('C',['b','c'])
+    Monomer('a',['a1'])
+    Monomer('b',['b1','b2'])
+    Monomer('c',['c1','c2'])
 
 def rate_constant_abc_model():
     #default rate constants
     Parameter('kab', 2.1e7)
     Parameter('kbc', 2.74e6)
     Parameter('lbc', 2e-4)
-    Parameter('kcc', 2*2e6)
+    Parameter('kcc', 2e6)
     Parameter('lcc', 1e-2)
 
 def rule_original_abc_model():
     """Monomer a can bind b. Monomer b can bind to monomer a and c on each sites.
     Monomer c can form dimer and bind b."""
     #binding criteria : (ab) b1 with a1, (bc) b2 with c1,(cc) c2 with itself
-    Rule('AB', A(b=None) + A(a=None) >> A(b=1)%B(a=1), kab)
-    Rule('BC', B(c=None) + C(b=None) <> B(c=1)%C(b=1), kbc, lbc)
-    Rule('CC', C(c=None) + C(c=None) <> C(c=1)%C(c=1), kcc, lcc)
+    Rule('ab', a(a1=None) + b(b1=None) >> a(a1=1)%b(b1=1), kab)
+    Rule('bc', b(b2=None) + c(c1=None) <> b(b2=1)%c(c1=1), kbc, lbc)
+    Rule('cc', c(c2=None) + c(c2=None) <> c(c2=1)%c(c2=1), kcc, lcc)
     
 def rule_abremoved_abc_model():
     #model knockout 1
