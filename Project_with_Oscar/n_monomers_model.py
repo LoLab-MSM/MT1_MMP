@@ -1,8 +1,15 @@
 from pysb import *
+import re
+from pysb.bng import generate_equations
+import pandas as pd
+import numpy as np
+
+def atoi(text):
+    return int(text) if text.isdigit() else text
 
 
-# monomers = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't',
-#             'u', 'v', 'w', 'x', 'y', 'z']
+def natural_keys(text):
+    return [ atoi(c) for c in re.split('(\d+)', text) ]
 
 
 def n_monomers_model(n):
@@ -56,3 +63,61 @@ def generate_model(n):
     Model()
     n_rules(n)
     return model
+
+
+def species_mon_names(species):
+    """
+
+    :param species: list of pysb species
+    :return: dictionary of species with their monomers names
+    """
+    sp_dict = {}
+    for i in species:
+        bla = tuple([j.monomer.name for j in i.monomer_patterns])
+        sp_dict[bla] = i
+    return sp_dict
+
+
+def get_number(string):
+    bla = [int(s) for s in re.findall(r'\d+', string)]
+    if len(bla) == 1:
+        return bla[0]
+    else:
+        return bla
+
+
+def get_b_lu_ld(df, group='lu', group_idx=1):
+    if group_idx > len(df.columns):
+        raise ValueError('group_idx larger than number of monomers')
+
+    group_fixed_idx = group_idx - 1
+    if group == 'ld':
+        df = df.iloc[::-1]
+        return np.diag(df, group_fixed_idx)
+    elif group == 'lu':
+        return np.diag(df, group_fixed_idx)
+    elif group == 'b':
+        return df[group_idx]
+    else:
+        raise ValueError('Parameter value not valid')
+
+
+def group_species(model):
+    if not model.species:
+        generate_equations(model)
+    sp_mon = species_mon_names(model.species)
+    mons_polymer = {i: [] for i in range(1, len(model.monomers)+1)}
+    for i, j in sp_mon.items():
+        mon_idx = get_number(i[-1])
+        mons_polymer[mon_idx].append(j)
+
+    # sorting lists by length
+    for i in mons_polymer:
+        mons_polymer[i].sort(key=len)
+        species = [sp_mon[j] for j in mons_polymer[i]]
+        mons_polymer[i] = species
+
+    # dataframe to group species
+    df = pd.DataFrame(np.nan, index=range(1, (2*len(model.monomers))+1), columns=range(1, len(model.monomers)+1))
+    for i, j in mons_polymer.items():
+        df[i].iloc[:len(j)] = j
